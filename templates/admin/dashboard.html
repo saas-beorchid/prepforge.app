@@ -1,0 +1,254 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Admin Dashboard | PrepForge Pro{% endblock %}
+
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Key metrics -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Users</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_users }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-people fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Premium Users</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ premium_users }}
+                            <span class="small text-muted">({{ conversion_rate }}%)</span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-star fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Questions Answered</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_answers }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-question-circle fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Avg Accuracy</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ avg_accuracy }}%</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-check-circle fs-2 text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- User Activity Chart -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">User Activity (30 Days)</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="userActivityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Exam Types -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Top Exam Types</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="examTypesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Users -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">New Users (Last Week)</h6>
+                <a href="{{ url_for('admin.user_management') }}" class="btn btn-sm btn-primary">View All</a>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    <h1 class="display-4">{{ new_users_count }}</h1>
+                    <p class="lead">new users joined in the last 7 days</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subscription Summary -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Subscription Summary</h6>
+                <a href="{{ url_for('admin.subscription_management') }}" class="btn btn-sm btn-primary">View Details</a>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h3>{{ premium_users }}</h3>
+                        <p class="text-muted">Premium Users</p>
+                    </div>
+                    <div class="col-6">
+                        <h3>${{ premium_users * 15 }}</h3>
+                        <p class="text-muted">Monthly Revenue</p>
+                    </div>
+                </div>
+                <div class="progress mt-3">
+                    {% set premium_percent = (premium_users / total_users * 100) if total_users > 0 else 0 %}
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ premium_percent }}%"
+                        aria-valuenow="{{ premium_percent }}" aria-valuemin="0" aria-valuemax="100">{{ premium_percent|round }}%</div>
+                </div>
+                <p class="small text-muted text-center mt-2">Premium User Percentage</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize activity chart
+    const activityCtx = document.getElementById('userActivityChart').getContext('2d');
+    new Chart(activityCtx, {
+        type: 'line',
+        data: {
+            labels: {{ daily_labels|safe }},
+            datasets: [
+                {
+                    label: 'Answers',
+                    data: {{ daily_answers|safe }},
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointBorderColor: '#fff',
+                    tension: 0.1,
+                    borderWidth: 2,
+                    fill: true,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'Active Users',
+                    data: {{ daily_users|safe }},
+                    backgroundColor: 'rgba(28, 200, 138, 0.05)',
+                    borderColor: 'rgba(28, 200, 138, 1)',
+                    pointBackgroundColor: 'rgba(28, 200, 138, 1)',
+                    pointBorderColor: '#fff',
+                    tension: 0.1,
+                    borderWidth: 2,
+                    fill: true,
+                    yAxisID: 'y1',
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Questions Answered'
+                    }
+                },
+                y1: {
+                    beginAtZero: true,
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Users'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Initialize exam types chart
+    const examCtx = document.getElementById('examTypesChart').getContext('2d');
+    new Chart(examCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ exam_labels|safe }},
+            datasets: [{
+                data: {{ exam_counts|safe }},
+                backgroundColor: [
+                    'rgba(78, 115, 223, 0.8)',
+                    'rgba(28, 200, 138, 0.8)',
+                    'rgba(54, 185, 204, 0.8)',
+                    'rgba(246, 194, 62, 0.8)',
+                    'rgba(231, 74, 59, 0.8)'
+                ],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            },
+            cutout: '70%'
+        }
+    });
+</script>
+{% endblock %}

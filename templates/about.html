@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}About - PrepForge{% endblock %}
+
+{% block extra_head %}
+<style>
+/* About Page Unified Design */
+.about-page {
+    background: linear-gradient(135deg, var(--off-white), var(--beige));
+    min-height: 100vh;
+    padding: var(--space-2xl) 0;
+}
+
+.about-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+.about-header {
+    text-align: center;
+    margin-bottom: var(--space-3xl);
+    padding: var(--space-2xl) 0;
+}
+
+.about-header h1 {
+    font-size: var(--font-size-4xl);
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: var(--space-md);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+    
+    .about-section {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: var(--space-2xl);
+        margin-bottom: var(--space-2xl);
+        transition: all var(--transition-base);
+    }
+    
+    .about-section:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .about-section h2 {
+        font-size: var(--font-size-2xl);
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: var(--space-lg);
+        padding-bottom: var(--space-sm);
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .about-section p {
+        font-size: var(--font-size-lg);
+        line-height: 1.7;
+        color: var(--gray-700);
+        margin-bottom: var(--space-lg);
+    }
+    
+    .mission-box {
+        background-color: #eff6ff;
+        border-left: 5px solid #2563eb;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        margin: 2rem 0;
+    }
+    
+    .mission-box h2 {
+        color: #1e40af;
+        border-bottom: none;
+        margin-bottom: 1rem;
+    }
+    
+    .mission-box p {
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
+    
+    .student-types {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .student-type {
+        background-color: #f9fafb;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .student-type p {
+        margin-bottom: 0;
+    }
+    
+    .team-message {
+        font-style: italic;
+        text-align: center;
+        padding: 2rem;
+        background-color: #f9fafb;
+        border-radius: 0.5rem;
+        margin: 3rem 0 1rem;
+    }
+    
+    .signature {
+        text-align: right;
+        font-weight: 600;
+        color: #4b5563;
+        margin-top: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .about-header h1 {
+            font-size: 2rem;
+        }
+        
+        .about-section h2 {
+            font-size: 1.5rem;
+        }
+        
+        .student-types {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <div class="about-container">
+    <div class="about-header">
+        <h1>About PrepForge</h1>
+    </div>
+    
+    <div class="about-section">
+        <h2>Why We Started</h2>
+        <p>PrepForge began with a simple but frustrating question:</p>
+        <p>"Why is test prep still stuck in the past?"</p>
+        <p>As Ivy League students— grinding late nights through static flashcards and recycled practice tests — we saw how broken the traditional system was. Everyone was giving students the same questions, the same pace, the same one-size-fits-all path… regardless of where they were actually struggling.</p>
+        <p>We didn't need more PDFs.</p>
+        <p>We needed a smarter way to learn. So we built one.</p>
+    </div>
+    
+    <div class="about-section">
+        <h2>What We Believe</h2>
+        <p>We believe that every student is different. So your test prep should adapt to you — not the other way around.</p>
+        <p>At PrepForge, we've created an intelligent learning engine that:</p>
+        <ul>
+            <li>Delivers never-repeating, custom questions tailored to your performance</li>
+            <li>Adjusts difficulty in real-time as you improve</li>
+            <li>Helps you study smarter, faster, and more efficiently</li>
+        </ul>
+        <p>No more guesswork.</p>
+        <p>No more wasted hours.</p>
+        <p>Just targeted, intelligent progress.</p>
+    </div>
+    
+    <div class="about-section">
+        <h2>Who We're For</h2>
+        <p>PrepForge is for dreamers who dare to do more:</p>
+        
+        <div class="student-types">
+            <div class="student-type">
+                <p>The GMAT taker pushing for 700+ to land that top MBA admit</p>
+            </div>
+            
+            <div class="student-type">
+                <p>The med school hopeful working full-time while prepping for the MCAT</p>
+            </div>
+            
+            <div class="student-type">
+                <p>The GRE warrior balancing family, work, and study</p>
+            </div>
+            
+            <div class="student-type">
+                <p>The USMLE student who refuses to take shortcuts with their future</p>
+            </div>
+        </div>
+        
+        <p>Whether you're in a dorm room, on a lunch break, or grinding at midnight — we're here to help you get where you're going.</p>
+    </div>
+    
+    <div class="mission-box">
+        <h2>Our Mission</h2>
+        <p>To make elite-level test preparation affordable, personalized, and accessible for every student in the world — no matter their background, budget, or bandwidth.</p>
+        <p>You deserve a shot at greatness.</p>
+        <p>We're here to help you earn it.</p>
+    </div>
+    
+    <div class="about-section">
+        <h2>From Our Team to You</h2>
+        <p>We're a small but passionate group of educators, engineers, and test-prep survivors who genuinely care about leveling the playing field. Whether you're applying to business school, med school, or grad school — your success is personal to us.</p>
+        
+        <div class="team-message">
+            <p>If you're reading this, we want you to know:</p>
+            <p>You're not alone.</p>
+            <p>You can do this.</p>
+            <p>And we built PrepForge to prove it.</p>
+            <p>Let's get to work.</p>
+            <div class="signature">— The PrepForge Team</div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

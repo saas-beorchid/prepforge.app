@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PrepForge - AI-Powered Test Preparation{% endblock %}</title>
+    <meta name="description" content="{% block description %}Ace your standardized tests with PrepForge's adaptive learning platform. Get personalized questions for GMAT, GRE, MCAT, LSAT and more.{% endblock %}">
+    <meta name="keywords" content="test preparation, GMAT, GRE, MCAT, LSAT, standardized tests, adaptive learning">
+    
+    <!-- Performance optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    
+    <!-- Icons optimized -->
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='img/favicon.jpg') }}" sizes="32x32">
+    <link rel="shortcut icon" type="image/jpeg" href="{{ url_for('static', filename='img/favicon.jpg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/favicon.jpg') }}" sizes="180x180">
+    
+    <!-- Critical CSS loaded first -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile-first.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile-native-menu.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/performance.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive-images.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/accessibility.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    
+    <!-- Non-critical CSS loaded asynchronously -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></noscript>
+    
+    {% block extra_head %}{% endblock %}
+    <!-- Critical above-the-fold CSS -->
+    <style>
+        /* Critical CSS for immediate rendering */
+        .main-header{background-color:#121212;position:fixed;top:0;left:0;right:0;z-index:1000;padding:0.75rem 1rem;}
+        .header-content{display:flex;justify-content:space-between;align-items:center;width:100%;position:relative;}
+        .logo{display:flex;align-items:center;}
+        .main-content{padding-top:80px;min-height:calc(100vh - 80px);}
+        .container{width:100%;max-width:1200px;margin:0 auto;padding:0 1rem;}
+        
+        /* Prevent mobile nav flash on desktop */
+        @media (min-width: 769px) {
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+            
+            .main-nav {
+                position: static !important;
+                transform: none !important;
+                background: none !important;
+                backdrop-filter: none !important;
+                height: auto !important;
+                width: auto !important;
+                flex-direction: row !important;
+                justify-content: flex-end !important;
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .main-nav a {
+                color: white !important;
+                font-size: 1rem !important;
+                padding: 0.5rem 1rem !important;
+                margin: 0 0.25rem !important;
+                width: auto !important;
+                border: none !important;
+                text-decoration: none !important;
+                background: none !important;
+                min-height: auto !important;
+                display: inline-flex !important;
+                flex-direction: row !important;
+                gap: 0 !important;
+            }
+            
+            .main-nav a:before,
+            .main-nav a:after {
+                display: none !important;
+            }
+            
+            .main-nav a:hover {
+                background: none !important;
+                background-color: transparent !important;
+            }
+            
+            .logo {
+                width: auto !important;
+                justify-content: flex-start !important;
+            }
+        }
+        
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            .main-header {
+                padding: 0.5rem 1rem;
+                height: 60px;
+            }
+            
+            .main-content {
+                padding-top: 60px;
+            }
+            
+            .container {
+                padding: 0 0.75rem;
+            }
+            
+            .logo {
+                justify-content: space-between !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="sr-only">Skip to main content</a>
+
+    <!-- Fixed Header -->
+    <header class="main-header" role="banner">
+        <div class="header-content">
+            <div class="logo">
+                <a href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('index') }}">
+                    <img src="{{ url_for('static', filename='img/prepforge-logo.jpg') }}" 
+                         alt="PrepForge Logo" 
+                         class="prepforge-logo critical-image" 
+                         style="height: 3rem; width: auto; border-radius: 8px;"
+                         loading="eager"
+                         decoding="sync">
+                </a>
+                <!-- Hamburger Menu for Mobile -->
+                <div class="mobile-menu-toggle" aria-expanded="false" aria-label="Toggle navigation">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <nav role="navigation" aria-label="Main navigation" class="main-nav" id="mainNav">
+                <a href="{{ url_for('about') }}">About</a>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('practice.show_question') }}">Practice</a>
+                    <a href="{{ url_for('pricing') }}">Pricing</a>
+                    <a href="{{ url_for('buddy.view_badges') }}">Badges</a>
+                    <a href="{{ url_for('profile') }}">Profile</a>
+                    <a href="{{ url_for('auth.logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.signin') }}">Sign In</a>
+                    <a href="{{ url_for('auth.signup') }}" class="cta-button">Try PrepForge</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content" role="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer" role="contentinfo">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="{{ url_for('about') }}" class="footer-link">
+                    <i class="fas fa-info-circle"></i> About Us
+                </a>
+                <a href="https://www.instagram.com/prepforge.app/" target="_blank" class="footer-link">
+                    <i class="fab fa-instagram"></i> Instagram
+                </a>
+                <a href="{{ url_for('privacy_policy') }}" class="footer-link">
+                    <i class="fas fa-shield-alt"></i> Privacy Policy
+                </a>
+                <a href="{{ url_for('terms') }}" class="footer-link">
+                    <i class="fas fa-file-contract"></i> Terms of Service
+                </a>
+            </div>
+            <p class="footer-copyright">© 2025 PrepForge. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Error handling and optimization scripts -->
+    <script src="{{ url_for('static', filename='js/error-handler.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/lazy-images.js') }}" defer></script>
+    
+    <!-- Stripe.js Integration - Latest Version -->
+    <script src="https://js.stripe.com/v3/" async></script>
+    
+    <!-- Embedded checkout styles -->
+    <style>
+        #checkout-overlay {
+            backdrop-filter: blur(4px);
+        }
+        
+        #embedded-checkout-container {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        @media (max-width: 768px) {
+            #checkout-overlay {
+                padding: 1rem;
+            }
+            
+            #embedded-checkout-container {
+                padding: 1rem;
+                margin: 1rem auto;
+            }
+        }
+    </style>
+    
+    <!-- Performance and mobile optimization scripts -->
+    <script src="{{ url_for('static', filename='js/performance.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/mobile-optimization.js') }}" defer></script>
+
+    
+    <!-- Global embedded checkout function -->
+    <script>
+        // Define global functions immediately
+        window.startEmbeddedCheckout = async function() {
+            try {
+                console.log('🚀 Starting embedded checkout from global function...');
+                
+                // Create checkout session
+                const response = await fetch('/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'  // Include session cookies
+                });
+                
+                console.log('📡 Response status:', response.status);
+                console.log('📡 Response headers:', response.headers.get('content-type'));
+                
+                if (!response.ok) {
+                    console.error('❌ Response not OK:', response.status, response.statusText);
+                    if (response.status === 302 || response.status === 401) {
+                        throw new Error('Please log in to continue with checkout');
+                    }
+                    throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('📋 Response data:', data);
+                
+                if (data.success && data.client_secret) {
+                    console.log('✅ Client secret received, mounting embedded checkout...');
+                    await window.mountEmbeddedCheckout(data.client_secret);
+                } else {
+                    console.error('❌ Invalid response:', data);
+                    throw new Error(data.error || 'No client secret received');
+                }
+                
+            } catch (error) {
+                console.error('❌ Embedded checkout error:', error);
+                console.error('❌ Error details:', error.stack);
+                alert('Checkout failed: ' + error.message + '. Please check the console for details.');
+            }
+        }
+        
+        window.mountEmbeddedCheckout = async function(clientSecret) {
+            // Dynamic Stripe loading and embedded checkout mounting
+            if (!window.Stripe) {
+                console.log('📦 Loading Stripe.js...');
+                await new Promise((resolve) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://js.stripe.com/v3/';
+                    script.onload = resolve;
+                    document.head.appendChild(script);
+                });
+            }
+            
+            // Initialize Stripe with your actual publishable key
+            const stripe = Stripe('pk_live_51RfiyCLe6ksRgfFmgun1dGTZlKbUejU7Z8qd2ZLXeGKZ6n0YXJzq5GBhxpHfvV9RKVWayoUO7QqQULhgUv2j3fOk00Zqz9rEFD');
+            
+            // Create or get checkout container
+            let overlay = document.getElementById('checkout-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'checkout-overlay';
+                overlay.style.cssText = `
+                    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                    background: rgba(0, 0, 0, 0.8); z-index: 10000;
+                    overflow-y: auto; padding: 2rem; box-sizing: border-box;
+                    backdrop-filter: blur(4px);
+                `;
+                
+                const container = document.createElement('div');
+                container.id = 'embedded-checkout-container';
+                container.style.cssText = `
+                    max-width: 600px; margin: 0 auto; background: white;
+                    border-radius: 12px; padding: 2rem; position: relative;
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+                `;
+                
+                // Close button
+                const closeBtn = document.createElement('button');
+                closeBtn.innerHTML = '&times;';
+                closeBtn.style.cssText = `
+                    position: absolute; top: 1rem; right: 1rem;
+                    background: none; border: none; font-size: 2rem;
+                    cursor: pointer; color: #666; z-index: 1;
+                `;
+                closeBtn.onclick = () => {
+                    overlay.style.display = 'none';
+                    // Clean up checkout element
+                    const checkoutElement = container.querySelector('#stripe-checkout-element');
+                    if (checkoutElement) {
+                        checkoutElement.remove();
+                    }
+                    console.log('❌ Checkout closed by user');
+                };
+                
+                container.appendChild(closeBtn);
+                overlay.appendChild(container);
+                document.body.appendChild(overlay);
+                
+                // Close on overlay click
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        overlay.style.display = 'none';
+                        // Clean up checkout element
+                        const checkoutElement = container.querySelector('#stripe-checkout-element');
+                        if (checkoutElement) {
+                            checkoutElement.remove();
+                        }
+                        console.log('❌ Checkout closed by overlay click');
+                    }
+                });
+            }
+            
+            // Create a dedicated checkout element inside the container
+            const container = document.getElementById('embedded-checkout-container');
+            
+            // Clear any existing checkout content but keep structure
+            let checkoutElement = container.querySelector('#stripe-checkout-element');
+            if (checkoutElement) {
+                checkoutElement.remove();
+            }
+            
+            // Create completely new checkout element with no children
+            checkoutElement = document.createElement('div');
+            checkoutElement.id = 'stripe-checkout-element';
+            checkoutElement.style.cssText = 'margin-top: 3rem; width: 100%; min-height: 500px;';
+            
+            // Add checkout element to container (after close button)  
+            container.appendChild(checkoutElement);
+            
+            // Show overlay first
+            overlay.style.display = 'block';
+            
+            // Mount embedded checkout in the completely clean element
+            const checkout = await stripe.initEmbeddedCheckout({
+                clientSecret: clientSecret
+            });
+            
+            // Mount to the clean div element
+            checkout.mount(checkoutElement);
+            
+            console.log('✅ Embedded checkout mounted and displayed');
+        };
+        
+        // Ensure functions are available immediately
+        console.log('✅ Global embedded checkout functions loaded');
+    </script>
+    
+    <!-- MathJax for mathematical content - optimized loading -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax loaded and ready');
+                    });
+                }
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6" defer></script>
+    <script id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+
+    <!-- Enhanced JavaScript for hamburger menu -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const mainNav = document.querySelector('.main-nav');
+            const body = document.body;
+            
+            console.log('🔍 Looking for menu elements...');
+            console.log('Toggle found:', !!mobileMenuToggle);
+            console.log('Nav found:', !!mainNav);
+            
+            if (mobileMenuToggle && mainNav) {
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    console.log('🍔 Hamburger menu clicked');
+                    console.log('📱 Nav classes before:', mainNav.className);
+                    console.log('📱 Toggle classes before:', this.className);
+                    
+                    // Use 'show' class instead of 'active' to avoid conflicts
+                    const isVisible = mainNav.classList.contains('show');
+                    
+                    if (isVisible) {
+                        mainNav.classList.remove('show');
+                        this.classList.remove('active');
+                        body.style.overflow = '';
+                        this.setAttribute('aria-expanded', 'false');
+                        console.log('📱 Mobile menu closed');
+                    } else {
+                        mainNav.classList.add('show');
+                        this.classList.add('active');
+                        body.style.overflow = 'hidden';
+                        this.setAttribute('aria-expanded', 'true');
+                        console.log('📱 Mobile menu opened');
+                    }
+                    
+                    console.log('📱 Nav classes after:', mainNav.className);
+                    console.log('📱 Toggle classes after:', this.className);
+                });
+                
+                // Close mobile menu when clicking on nav links
+                const navLinks = mainNav.querySelectorAll('a');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mainNav.classList.remove('show');
+                        mobileMenuToggle.classList.remove('active');
+                        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                        body.style.overflow = '';
+                        console.log('📱 Mobile menu closed after link click');
+                    });
+                });
+                
+                // Close mobile menu when clicking on the nav background (overlay)
+                mainNav.addEventListener('click', function(e) {
+                    if (e.target === mainNav) {
+                        mainNav.classList.remove('show');
+                        mobileMenuToggle.classList.remove('active');
+                        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                        body.style.overflow = '';
+                        console.log('📱 Mobile menu closed by clicking overlay');
+                    }
+                });
+                
+                // Handle escape key
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape' && mainNav.classList.contains('show')) {
+                        mainNav.classList.remove('show');
+                        mobileMenuToggle.classList.remove('active');
+                        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                        body.style.overflow = '';
+                        console.log('📱 Mobile menu closed by escape key');
+                    }
+                });
+                
+                console.log('✅ Mobile hamburger menu initialized');
+            } else {
+                console.warn('⚠️ Mobile menu elements not found');
+                console.warn('Toggle element:', mobileMenuToggle);
+                console.warn('Nav element:', mainNav);
+            }
+        });
+    </script>
+</body>
+</html>

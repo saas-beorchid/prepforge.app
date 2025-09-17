@@ -1,0 +1,39 @@
+<svg width="300" height="200" viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g clip-path="url(#clip0_1_2)">
+    <!-- Background Shapes -->
+    <circle cx="150" cy="100" r="80" fill="#f0f4ff" />
+    <circle cx="190" cy="60" r="30" fill="#e0e8ff" />
+    <circle cx="110" cy="140" r="20" fill="#d0dcff" />
+    
+    <!-- Profile Card -->
+    <rect x="120" y="50" width="120" height="140" rx="8" fill="white" stroke="#6200ee" stroke-width="2"/>
+    
+    <!-- Avatar Circle -->
+    <circle cx="180" cy="90" r="25" fill="#6200ee" />
+    <circle cx="173" cy="83" r="4" fill="white" />
+    <circle cx="187" cy="83" r="4" fill="white" />
+    <path d="M170 98C170 98 175 103 180 103C185 103 190 98 190 98" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Card Content Lines -->
+    <rect x="135" y="130" width="90" height="5" rx="2.5" fill="#e0e0e0" />
+    <rect x="135" y="145" width="70" height="5" rx="2.5" fill="#e0e0e0" />
+    <rect x="135" y="160" width="80" height="5" rx="2.5" fill="#e0e0e0" />
+    
+    <!-- Trophy Icon -->
+    <circle cx="80" cy="100" r="30" fill="#ffd700" opacity="0.7" />
+    <path d="M80 85V115M70 95H90M65 115H95" stroke="#6200ee" stroke-width="3" stroke-linecap="round" />
+    
+    <!-- Graph Icon -->
+    <rect x="210" y="130" width="50" height="30" rx="4" fill="#e0e8ff" stroke="#6200ee" />
+    <path d="M215 150L225 140L235 145L245 130L255 138" stroke="#6200ee" stroke-width="2" stroke-linecap="round" />
+    
+    <!-- Stars -->
+    <path d="M50 50L54 58L63 59L56.5 65L58 74L50 70L42 74L43.5 65L37 59L46 58L50 50Z" fill="#ffd700" opacity="0.8" />
+    <path d="M235 40L238 46L245 46.5L240 51L241 57.5L235 54.5L229 57.5L230 51L225 46.5L232 46L235 40Z" fill="#ffd700" opacity="0.8" />
+  </g>
+  <defs>
+    <clipPath id="clip0_1_2">
+      <rect width="300" height="200" fill="white"/>
+    </clipPath>
+  </defs>
+</svg>

@@ -1,0 +1,837 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Badges | PrepForge Pro{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing-page.css') }}">
+<style>
+    /* Badges Page Custom Styles with Enhanced UI based on landing page design */
+    :root {
+        --primary-color: #6200ee;
+        --secondary-color: #03dac6;
+        --primary-gradient: linear-gradient(135deg, #6200ee, #03dac6);
+        --accent-color: #ffc107;
+        --text-primary: #212529;
+        --text-secondary: #6c757d;
+        --text-muted: #86868b;
+        --bg-light: #f8f9fa;
+        --bg-card: #ffffff;
+        --border-color: #e9ecef;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 16px;
+        --spacing-xs: 0.5rem;
+        --spacing-sm: 1rem;
+        --spacing-md: 1.5rem;
+        --spacing-lg: 2rem;
+    }
+    
+    /* Enhanced stats card with better visual hierarchy */
+    .badge-stats-card {
+        border-radius: var(--border-radius-md);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-card);
+    }
+    
+    .badge-stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    /* Improved stat items with consistent color palette */
+    .stat-item {
+        padding: 1.5rem 0.5rem;
+        transition: all 0.3s ease;
+        border-radius: var(--border-radius-sm);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+    
+    .stat-item:before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 0;
+        bottom: 0;
+        left: 0;
+        background-color: rgba(255,255,255,0.1);
+        transition: all 0.3s ease;
+        z-index: 0;
+    }
+    
+    .stat-item:hover:before {
+        height: 100%;
+    }
+    
+    .stat-item * {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Enhanced stat numbers with consistent design */
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-label {
+        font-size: 1rem;
+        font-weight: 500;
+        opacity: 0.9;
+    }
+    
+    /* Section spacing and organization */
+    .badge-section {
+        margin-bottom: 2.5rem;
+        background-color: var(--bg-card);
+        border-radius: var(--border-radius-md);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+    }
+    
+    /* Enhanced category title with clearer visual hierarchy */
+    .category-title {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        font-size: 1.5rem;
+        padding-bottom: 10px;
+        color: var(--text-primary);
+    }
+    
+    .category-title:after {
+        content: '';
+        position: absolute;
+        width: 60px;
+        height: 4px;
+        bottom: 0;
+        left: 0;
+        background: var(--primary-gradient);
+        border-radius: 2px;
+    }
+    
+    /* Improved badge card with better spacing and visual cues */
+    .badge-card {
+        border-radius: var(--border-radius-md);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        background-color: white;
+        padding: 1.5rem 1rem;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+    }
+    
+    /* Enhanced styles for earned badges */
+    .badge-card.earned {
+        box-shadow: 0 10px 20px rgba(40, 167, 69, 0.15);
+        border: 2px solid #28a745;
+    }
+    
+    /* Clearly differentiate locked badges */
+    .badge-card.locked {
+        filter: grayscale(80%);
+        opacity: 0.7;
+    }
+    
+    /* Improved hover effects for badge cards */
+    .badge-card:hover {
+        transform: translateY(-7px) scale(1.02);
+        box-shadow: var(--shadow-md);
+    }
+    
+    /* Larger, more prominent badge icons */
+    .badge-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        transition: transform 0.5s ease;
+        display: inline-block;
+    }
+    
+    /* Animated icon rotation on hover */
+    .badge-card:hover .badge-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    /* Better typography for badge names */
+    .badge-name {
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+    
+    /* More readable badge descriptions */
+    .badge-desc {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+        color: var(--text-secondary);
+    }
+    
+    /* Enhanced visual status indicator */
+    .badge-status {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .badge-status i {
+        margin-right: 5px;
+    }
+    
+    .badge-status.earned {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .badge-status.locked {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    /* Improved next badge container */
+    .next-badge-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+        border-radius: var(--border-radius-md);
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+    }
+    
+    /* Clearer next badge title */
+    .next-badge-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+    }
+    
+    .next-badge-title i {
+        margin-right: 0.75rem;
+        color: var(--accent-color);
+    }
+    
+    /* Enhanced progress container */
+    .progress-container {
+        margin-top: 1.5rem;
+        position: relative;
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+    }
+    
+    /* Improved progress bar styling */
+    .progress {
+        height: 25px;
+        border-radius: 20px;
+        background-color: rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Animated progress bar with gradient */
+    .progress-bar {
+        height: 100%;
+        border-radius: 20px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+        transition: width 1s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Striped animation for progress bar */
+    .progress-bar:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-image: linear-gradient(
+            -45deg, 
+            rgba(255, 255, 255, .2) 25%, 
+            transparent 25%, 
+            transparent 50%, 
+            rgba(255, 255, 255, .2) 50%, 
+            rgba(255, 255, 255, .2) 75%, 
+            transparent 75%, 
+            transparent
+        );
+        background-size: 30px 30px;
+        animation: move 2s linear infinite;
+        overflow: hidden;
+    }
+    
+    @keyframes move {
+        0% {
+            background-position: 0 0;
+        }
+        100% {
+            background-position: 30px 30px;
+        }
+    }
+    
+    /* Improved progress text legibility */
+    .progress-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: 700;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        z-index: 2;
+    }
+    
+    /* Responsive badge grid */
+    .badge-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 1.5rem;
+    }
+    
+    /* Enhanced back button */
+    .back-btn {
+        margin-top: 2rem;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        background-color: var(--primary-color);
+        border: none;
+        color: white;
+        box-shadow: 0 5px 15px rgba(98, 0, 238, 0.3);
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .back-btn i {
+        margin-right: 0.75rem;
+    }
+    
+    .back-btn:hover {
+        background-color: #5000ca;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(98, 0, 238, 0.4);
+        color: white;
+    }
+    
+    /* Stats colors with consistent brand palette */
+    .stat-questions { 
+        background-color: rgba(98, 0, 238, 0.1); 
+    }
+    .stat-questions .stat-number { 
+        color: var(--primary-color); 
+    }
+    
+    .stat-accuracy { 
+        background-color: rgba(3, 218, 198, 0.1); 
+    }
+    .stat-accuracy .stat-number { 
+        color: var(--secondary-color); 
+    }
+    
+    .stat-streak { 
+        background-color: rgba(255, 193, 7, 0.1); 
+    }
+    .stat-streak .stat-number { 
+        color: var(--accent-color); 
+    }
+    
+    .stat-badges { 
+        background-color: rgba(220, 53, 69, 0.1); 
+    }
+    .stat-badges .stat-number { 
+        color: #dc3545; 
+    }
+    
+    /* Journey container styling */
+    .journey-container {
+        background: var(--primary-gradient);
+        border-radius: var(--border-radius-md);
+        padding: 2.5rem;
+        margin-bottom: 3rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .journey-container:before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .journey-container h1 {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+    }
+    
+    /* Badge category container with improved grouping */
+    .badge-category-container {
+        background-color: white;
+        border-radius: var(--border-radius-md);
+        padding: 0;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        margin-bottom: 2.5rem;
+    }
+    
+    .category-header {
+        background-color: var(--bg-light);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+    }
+    
+    .category-header h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    
+    .category-header i {
+        margin-right: 0.75rem;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+    }
+    
+    .category-body {
+        padding: 1.5rem;
+    }
+    
+    /* Badge achievement progress section */
+    .achievement-progress {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 1.25rem;
+        background-color: rgba(98, 0, 238, 0.05);
+        border-radius: var(--border-radius-sm);
+        border: 1px solid rgba(98, 0, 238, 0.1);
+    }
+    
+    .achievement-icon {
+        background-color: white;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1.25rem;
+        box-shadow: var(--shadow-sm);
+        border: 2px solid rgba(98, 0, 238, 0.2);
+        font-size: 1.75rem;
+        color: var(--primary-color);
+        flex-shrink: 0;
+    }
+    
+    .achievement-details {
+        flex: 1;
+    }
+    
+    .achievement-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--text-primary);
+    }
+    
+    .achievement-description {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.75rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Journey Header with Enhanced Visual Appeal -->
+    <div class="journey-container mb-5">
+        <h1 class="display-4 mb-4">Your Learning Journey</h1>
+        
+        <!-- Stats Summary with Improved Grouping & Visual Hierarchy -->
+        <div class="badge-stats-card">
+            <div class="row g-0">
+                <div class="col-md-3">
+                    <div class="stat-item stat-questions">
+                        <div class="stat-number">{{ stats.total_questions }}</div>
+                        <div class="stat-label">Questions Answered</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item stat-accuracy">
+                        <div class="stat-number">{{ stats.accuracy }}%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item stat-streak">
+                        <div class="stat-number">{{ stats.current_streak }}</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item stat-badges">
+                        <div class="stat-number">{{ stats.badges_count }}</div>
+                        <div class="stat-label">Badges Earned</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next Badge Progress with Enhanced Visual Elements -->
+    {% if stats.next_badge %}
+    <div class="row mb-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="next-badge-container">
+                <div class="next-badge-title">
+                    <i class="fas fa-trophy"></i> Next Achievement: {{ stats.next_badge.name }}
+                </div>
+                <p class="text-muted mb-3">You're making great progress! Keep going to unlock your next badge.</p>
+                <div class="progress-container">
+                    <p class="mb-2"><strong>Progress:</strong> {{ stats.next_badge.current }} / {{ stats.next_badge.threshold }}</p>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: {{ stats.next_badge.percentage }}%">
+                        </div>
+                        <div class="progress-text">{{ stats.next_badge.percentage }}%</div>
+                    </div>
+                    <p class="text-muted mt-3 small">Keep practicing to earn this badge!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Question Mastery Badges - Improved Grouping & Visual Hierarchy -->
+    <div class="badge-category-container">
+        <div class="category-header">
+            <i class="fas fa-graduation-cap"></i>
+            <h2>Question Mastery</h2>
+        </div>
+        <div class="category-body">
+            <div class="achievement-progress">
+                <div class="achievement-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="achievement-details">
+                    <div class="achievement-title">Master the Fundamentals</div>
+                    <div class="achievement-description">Collect these badges by answering more questions to show your commitment to learning.</div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 
+                            {% if badges.questions|length > 0 %}
+                                {{ (badges.questions|selectattr('id', 'in', earned_badge_ids)|list|length / badges.questions|length * 100)|round }}
+                            {% else %}
+                                0
+                            {% endif %}%">
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {{ badges.questions|selectattr('id', 'in', earned_badge_ids)|list|length }} of {{ badges.questions|length }} badges earned
+                    </small>
+                </div>
+            </div>
+            
+            <div class="badge-grid">
+                {% for badge in badges.questions %}
+                <div class="badge-card-wrapper">
+                    <div class="badge-card {% if badge.id in earned_badge_ids %}earned{% else %}locked{% endif %}">
+                        <div class="badge-icon">
+                            <i class="{{ badge.icon }} text-{{ badge.color }}"></i>
+                        </div>
+                        <div class="badge-name">{{ badge.name }}</div>
+                        <div class="badge-desc">{{ badge.description }}</div>
+                        <div class="badge-status {% if badge.id in earned_badge_ids %}earned{% else %}locked{% endif %}">
+                            {% if badge.id in earned_badge_ids %}
+                                <i class="fas fa-check-circle"></i> Earned
+                            {% else %}
+                                <i class="fas fa-lock"></i> {{ badge.threshold }} questions
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Consistency Badges - Improved Grouping & Visual Hierarchy -->
+    <div class="badge-category-container">
+        <div class="category-header">
+            <i class="fas fa-calendar-check"></i>
+            <h2>Consistency Champions</h2>
+        </div>
+        <div class="category-body">
+            <div class="achievement-progress">
+                <div class="achievement-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="achievement-details">
+                    <div class="achievement-title">Develop Your Study Habit</div>
+                    <div class="achievement-description">Maintaining a streak shows your commitment to consistent learning, which is key to long-term success.</div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 
+                            {% if badges.streak|length > 0 %}
+                                {{ (badges.streak|selectattr('id', 'in', earned_badge_ids)|list|length / badges.streak|length * 100)|round }}
+                            {% else %}
+                                0
+                            {% endif %}%">
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {{ badges.streak|selectattr('id', 'in', earned_badge_ids)|list|length }} of {{ badges.streak|length }} badges earned
+                    </small>
+                </div>
+            </div>
+            
+            <div class="badge-grid">
+                {% for badge in badges.streak %}
+                <div class="badge-card-wrapper">
+                    <div class="badge-card {% if badge.id in earned_badge_ids %}earned{% else %}locked{% endif %}">
+                        <div class="badge-icon">
+                            <i class="{{ badge.icon }} text-{{ badge.color }}"></i>
+                        </div>
+                        <div class="badge-name">{{ badge.name }}</div>
+                        <div class="badge-desc">{{ badge.description }}</div>
+                        <div class="badge-status {% if badge.id in earned_badge_ids %}earned{% else %}locked{% endif %}">
+                            {% if badge.id in earned_badge_ids %}
+                                <i class="fas fa-check-circle"></i> Earned
+                            {% else %}
+                                <i class="fas fa-lock"></i> {{ badge.threshold }} day streak
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Accuracy Badges - Improved Grouping & Visual Hierarchy -->
+    <div class="badge-category-container">
+        <div class="category-header">
+            <i class="fas fa-bullseye"></i>
+            <h2>Accuracy Masters</h2>
+        </div>
+        <div class="category-body">
+            <div class="achievement-progress">
+                <div class="achievement-icon">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <div class="achievement-details">
+                    <div class="achievement-title">Perfect Your Knowledge</div>
+                    <div class="achievement-description">High accuracy demonstrates true understanding of the material. Keep improving to earn these badges!</div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 
+                            {% if badges.accuracy|length > 0 %}
+                                {{ (badges.accuracy|selectattr('id', 'in', earned_badge_ids)|list|length / badges.accuracy|length * 100)|round }}
+                            {% else %}
+                                0
+                            {% endif %}%">
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {{ badges.accuracy|selectattr('id', 'in', earned_badge_ids)|list|length }} of {{ badges.accuracy|length }} badges earned
+                    </small>
+                </div>
+            </div>
+            
+            <div class="badge-grid">
+                {% for badge in badges.accuracy %}
+                <div class="badge-card-wrapper">
+                    <div class="badge-card {% if badge.id in earned_badge_ids %}earned{% else %}locked{% endif %}">
+                        <div class="badge-icon">
+                            <i class="{{ badge.icon }} text-{{ badge.color }}"></i>
+                        </div>
+                        <div class="badge-name">{{ badge.name }}</div>
+                        <div class="badge-desc">{{ badge.description }}</div>
+                        <div class="badge-status {% if badge.id in earned_badge_ids %}earned{% else %}locked{% endif %}">
+                            {% if badge.id in earned_badge_ids %}
+                                <i class="fas fa-check-circle"></i> Earned
+                            {% else %}
+                                <i class="fas fa-lock"></i> {{ badge.threshold }}% accuracy
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Special Achievements - Improved Grouping & Visual Hierarchy -->
+    {% if badges.special %}
+    <div class="badge-category-container">
+        <div class="category-header">
+            <i class="fas fa-award"></i>
+            <h2>Special Achievements</h2>
+        </div>
+        <div class="category-body">
+            <div class="achievement-progress">
+                <div class="achievement-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="achievement-details">
+                    <div class="achievement-title">Exceptional Milestones</div>
+                    <div class="achievement-description">These unique badges recognize special accomplishments in your learning journey.</div>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 
+                            {% if badges.special|length > 0 %}
+                                {{ (badges.special|selectattr('id', 'in', earned_badge_ids)|list|length / badges.special|length * 100)|round }}
+                            {% else %}
+                                0
+                            {% endif %}%">
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {{ badges.special|selectattr('id', 'in', earned_badge_ids)|list|length }} of {{ badges.special|length }} badges earned
+                    </small>
+                </div>
+            </div>
+            
+            <div class="badge-grid">
+                {% for badge in badges.special %}
+                <div class="badge-card-wrapper">
+                    <div class="badge-card {% if badge.id in earned_badge_ids %}earned{% else %}locked{% endif %}">
+                        <div class="badge-icon">
+                            <i class="{{ badge.icon }} text-{{ badge.color }}"></i>
+                        </div>
+                        <div class="badge-name">{{ badge.name }}</div>
+                        <div class="badge-desc">{{ badge.description }}</div>
+                        <div class="badge-status {% if badge.id in earned_badge_ids %}earned{% else %}locked{% endif %}">
+                            {% if badge.id in earned_badge_ids %}
+                                <i class="fas fa-check-circle"></i> Earned
+                            {% else %}
+                                <i class="fas fa-lock"></i> Keep practicing!
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Back Button with Improved Visual Feedback -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto text-center">
+            <a href="{{ url_for('dashboard') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Enhanced animations for badges page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate progress bars on page load
+        const progressBars = document.querySelectorAll('.progress-bar');
+        setTimeout(() => {
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        }, 300);
+        
+        // Add hover effects and animations for badge cards
+        const badgeCards = document.querySelectorAll('.badge-card');
+        badgeCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                const icon = this.querySelector('.badge-icon');
+                icon.style.transform = 'scale(1.1) rotate(5deg)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                const icon = this.querySelector('.badge-icon');
+                icon.style.transform = 'scale(1)';
+            });
+        });
+
+        // Animate stat numbers on load
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach(stat => {
+            const finalValue = stat.textContent;
+            // Check if it's a numeric value (not containing %)
+            if (!isNaN(parseInt(finalValue)) && !finalValue.includes('%')) {
+                stat.textContent = '0';
+                let current = 0;
+                const target = parseInt(finalValue);
+                const increment = Math.max(1, Math.floor(target / 20));
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        clearInterval(timer);
+                        stat.textContent = finalValue;
+                    } else {
+                        stat.textContent = current;
+                    }
+                }, 30);
+            } else if (finalValue.includes('%')) {
+                // For percentage values
+                const numericValue = parseInt(finalValue);
+                if (!isNaN(numericValue)) {
+                    stat.textContent = '0%';
+                    let current = 0;
+                    const target = numericValue;
+                    const increment = Math.max(1, Math.floor(target / 20));
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            clearInterval(timer);
+                            stat.textContent = finalValue;
+                        } else {
+                            stat.textContent = current + '%';
+                        }
+                    }, 30);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

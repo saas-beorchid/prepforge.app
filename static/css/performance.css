@@ -1,0 +1,92 @@
+/* Performance Optimizations CSS */
+/* Critical CSS for above-the-fold content loading */
+
+/* Preload critical resources */
+.preload-fonts {
+    font-display: swap;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Optimize image loading with lazy loading support */
+.lazy-image {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: linear-gradient(90deg, #f0f0f0 25%, transparent 37%, #f0f0f0 63%);
+    background-size: 400% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+.lazy-image.loaded {
+    opacity: 1;
+    animation: none;
+    background: none;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+}
+
+/* Optimize critical rendering path */
+.critical-content {
+    contain: layout style paint;
+}
+
+/* Reduce layout shifts */
+.question-container {
+    min-height: 400px;
+    contain: layout;
+}
+
+.option {
+    min-height: 60px;
+    contain: layout;
+}
+
+/* Optimize animations for performance */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* GPU acceleration for smooth animations */
+.animate-gpu {
+    will-change: transform;
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Optimize font loading */
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: local('Inter'), url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap') format('woff2');
+}
+
+/* Critical CSS inlined for faster loading */
+.above-fold {
+    display: block;
+    visibility: visible;
+}
+
+.below-fold {
+    content-visibility: auto;
+    contain-intrinsic-size: 200px;
+}
+
+/* Optimize repaints and reflows */
+.optimized-element {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Defer non-critical CSS */
+.non-critical {
+    content-visibility: auto;
+    contain: layout style paint;
+}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Cancelled - PrepForge{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark text-center">
+                    <h3><i class="fas fa-info-circle"></i> Payment Cancelled</h3>
+                </div>
+                <div class="card-body text-center">
+                    <h4>No worries!</h4>
+                    <p class="mb-4">Your payment was cancelled. You can upgrade to Pro anytime to unlock unlimited practice questions and premium features.</p>
+                    
+                    <div class="alert alert-info">
+                        <strong>What you're missing out on:</strong>
+                        <ul class="list-unstyled mt-2">
+                            <li><i class="fas fa-times text-muted"></i> Unlimited practice questions</li>
+                            <li><i class="fas fa-times text-muted"></i> All 13 exam types available</li>
+                            <li><i class="fas fa-times text-muted"></i> Advanced analytics and progress tracking</li>
+                            <li><i class="fas fa-times text-muted"></i> Priority customer support</li>
+                        </ul>
+                        <small class="text-muted">Current plan: Free (20 questions limit)</small>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        <form method="POST" action="/create-checkout-session" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-lg ml-2">
+                                <i class="fas fa-crown"></i> Try Again - Upgrade to Pro
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Track payment cancellation
+if (window.mixpanel && window.mixpanelToken) {
+    mixpanel.track('Payment Cancelled', {
+        user_id: '{{ current_user.id if current_user.is_authenticated else "anonymous" }}',
+        upgrade_type: 'pro',
+        payment_method: 'stripe'
+    });
+}
+</script>
+{% endblock %}

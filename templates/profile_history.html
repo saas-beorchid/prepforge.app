@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Question History - PrepForge{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <h1><i class="fas fa-history"></i> Question History</h1>
+
+    <div class="history-filters">
+        <a href="{{ url_for('profile') }}" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Profile
+        </a>
+        <div class="filter-controls">
+            <form method="GET" class="filter-form">
+                <select name="exam_type" class="filter-select">
+                    <option value="">All Exam Types</option>
+                    {% for type in exam_types %}
+                    <option value="{{ type }}" {% if request.args.get('exam_type') == type %}selected{% endif %}>
+                        {{ type.replace('_', ' ') }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="filter-button">Filter</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="history-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Exam Type</th>
+                    <th>Question</th>
+                    <th>Your Answer</th>
+                    <th>Correct Answer</th>
+                    <th>Result</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in history %}
+                <tr>
+                    <td>{{ item.exam_type }}</td>
+                    <td>{{ item.question_text }}</td>
+                    <td>{{ item.options[item.user_answer] }}</td>
+                    <td>{{ item.options[item.correct_answer|int] }}</td>
+                    <td class="result {% if item.user_answer %}correct{% else %}wrong{% endif %}">
+                        {% if item.user_answer %}
+                        <i class="fas fa-check"></i> Correct
+                        {% else %}
+                        <i class="fas fa-times"></i> Wrong
+                        {% endif %}
+                    </td>
+                    <td>{{ item.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <div class="pagination">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('question_history', page=pagination.prev_num, exam_type=request.args.get('exam_type', '')) }}" class="page-link">Previous</a>
+        {% endif %}
+
+        {% for page in pagination.iter_pages() %}
+            {% if page %}
+                {% if page != pagination.page %}
+                    <a href="{{ url_for('question_history', page=page, exam_type=request.args.get('exam_type', '')) }}" class="page-link">{{ page }}</a>
+                {% else %}
+                    <span class="current-page">{{ page }}</span>
+                {% endif %}
+            {% else %}
+                <span class="ellipsis">...</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+        <a href="{{ url_for('question_history', page=pagination.next_num, exam_type=request.args.get('exam_type', '')) }}" class="page-link">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

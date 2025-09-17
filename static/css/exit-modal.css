@@ -1,0 +1,143 @@
+/* Mobile-friendly exit modal */
+.exit-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 1rem;
+}
+
+.exit-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.exit-modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 100%;
+    transform: scale(0.8);
+    transition: transform 0.3s ease;
+}
+
+.exit-modal-overlay.show .exit-modal {
+    transform: scale(1);
+}
+
+.exit-modal-header {
+    padding: 1.5rem 1.5rem 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.exit-modal-header h3 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.exit-modal-body {
+    padding: 1rem 1.5rem;
+}
+
+.exit-modal-body p {
+    margin: 0;
+    color: #6b7280;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.exit-modal-actions {
+    padding: 1rem 1.5rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.exit-modal-actions .btn {
+    flex: 1;
+    min-height: 48px;
+    font-weight: 500;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.exit-modal-actions .btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.exit-modal-actions .btn-secondary:hover {
+    background: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.exit-modal-actions .btn-primary {
+    background: linear-gradient(135deg, #4169e1, #6b46c1);
+    color: white;
+    border: none;
+    box-shadow: 0 2px 8px rgba(65, 105, 225, 0.3);
+}
+
+.exit-modal-actions .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(65, 105, 225, 0.4);
+}
+
+.exit-modal-actions .btn:active {
+    transform: translateY(0);
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 480px) {
+    .exit-modal {
+        margin: 1rem;
+        max-width: none;
+    }
+    
+    .exit-modal-actions {
+        flex-direction: column;
+    }
+    
+    .exit-modal-actions .btn {
+        flex: none;
+    }
+}
+
+/* Spinner styles for exit modal */
+.exit-modal .btn-spinner {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.exit-modal .btn .btn-text {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.exit-modal .btn.loading .btn-text {
+    display: none;
+}
+
+.exit-modal .btn.loading .btn-spinner {
+    display: flex;
+}

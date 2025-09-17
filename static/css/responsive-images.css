@@ -1,0 +1,267 @@
+/* Responsive Image Optimization Styles */
+
+/* Lazy loading image states */
+.lazy-image {
+    transition: opacity 0.3s ease, filter 0.3s ease;
+    filter: blur(2px);
+    opacity: 0.8;
+}
+
+.lazy-loading {
+    filter: blur(2px);
+    opacity: 0.6;
+}
+
+.lazy-loaded {
+    filter: none;
+    opacity: 1;
+}
+
+.lazy-error {
+    filter: grayscale(100%);
+    opacity: 0.5;
+    background-color: #f8f9fa;
+    position: relative;
+}
+
+.lazy-error::after {
+    content: '⚠️ Image failed to load';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    color: #6c757d;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+/* Responsive image containers */
+.responsive-image-container {
+    position: relative;
+    overflow: hidden;
+    display: block;
+}
+
+.responsive-image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Aspect ratio maintenance for different image types */
+.aspect-16-9 {
+    aspect-ratio: 16 / 9;
+}
+
+.aspect-4-3 {
+    aspect-ratio: 4 / 3;
+}
+
+.aspect-1-1 {
+    aspect-ratio: 1 / 1;
+}
+
+.aspect-3-2 {
+    aspect-ratio: 3 / 2;
+}
+
+/* Image fit options */
+.object-cover {
+    object-fit: cover;
+}
+
+.object-contain {
+    object-fit: contain;
+}
+
+.object-fill {
+    object-fit: fill;
+}
+
+/* Performance optimizations */
+img {
+    /* Enable GPU acceleration for smooth transitions */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    
+    /* Optimize rendering */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    
+    /* Prevent layout shifts */
+    max-width: 100%;
+    height: auto;
+}
+
+/* Critical images (don't lazy load) */
+.critical-image {
+    /* Ensure critical images load immediately */
+    loading: eager;
+}
+
+/* Logo optimizations */
+.prepforge-logo {
+    /* Ensure logo is always sharp */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    
+    /* Prevent layout shifts */
+    width: auto;
+    height: 3rem;
+    max-height: 3rem;
+}
+
+/* Exam logos responsive behavior */
+.exam-logo {
+    width: 100%;
+    max-width: 120px;
+    height: auto;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.exam-logo:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* Trust logos optimization */
+.trust-logo {
+    width: 100%;
+    max-width: 150px;
+    height: auto;
+    opacity: 0.8;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.trust-logo:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+/* Question example image */
+.question-example-image {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.3s ease;
+}
+
+.question-example-image:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile-first responsive breakpoints */
+@media (max-width: 480px) {
+    .exam-logo {
+        max-width: 80px;
+    }
+    
+    .trust-logo {
+        max-width: 100px;
+    }
+    
+    .question-example-image {
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Reduce image quality on very small screens for performance */
+    img:not(.critical-image):not(.prepforge-logo) {
+        image-rendering: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .exam-logo {
+        max-width: 100px;
+    }
+    
+    .trust-logo {
+        max-width: 120px;
+    }
+    
+    /* Optimize for touch devices */
+    .exam-logo:hover,
+    .trust-logo:hover {
+        transform: none; /* Disable hover effects on touch */
+    }
+}
+
+/* Tablet and desktop optimizations */
+@media (min-width: 769px) {
+    .exam-logo {
+        max-width: 140px;
+    }
+    
+    .trust-logo {
+        max-width: 180px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .question-example-image {
+        max-width: 900px;
+    }
+}
+
+/* High DPI (Retina) display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2),
+       (min-resolution: 192dpi),
+       (min-resolution: 2dppx) {
+    
+    /* Ensure crisp rendering on high DPI displays */
+    .prepforge-logo,
+    .exam-logo,
+    .trust-logo {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: optimize-contrast;
+    }
+}
+
+/* Print styles */
+@media print {
+    img {
+        /* Ensure images print properly */
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .lazy-image,
+    .lazy-loading {
+        /* Remove blur effects for printing */
+        filter: none !important;
+        opacity: 1 !important;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .lazy-image,
+    .lazy-loading,
+    .lazy-loaded,
+    .exam-logo,
+    .trust-logo,
+    .question-example-image {
+        /* Disable animations for users who prefer reduced motion */
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .lazy-error {
+        background-color: #1a1a1a;
+    }
+    
+    .lazy-error::after {
+        background: rgba(0, 0, 0, 0.9);
+        color: #e9ecef;
+    }
+}

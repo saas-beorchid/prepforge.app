@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PrepForge{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile-exam-selector.css') }}">
+<!-- Mixpanel tracking -->
+<script type="text/javascript">
+(function(c,a){if(!a.__SV){var b=window;try{var d,m,j,k=b.location,f=k.hash;d=function(a,b){return(m=a.match(RegExp(b+"=([^&]*)")))?m[1]:null};f&&d(f,"state")&&(j=JSON.parse(decodeURIComponent(d(f,"state"))),"mpeditor"===j.action&&(b.sessionStorage.setItem("_mpcehash",f),history.replaceState(j.desiredHash||"",c.title,k.pathname+k.search)))}catch(n){}var l,h;window.mixpanel=a;a._i=[];a.init=function(b,d,g){function c(b,i){var a=i.split(".");2==a.length&&(b=b[a[0]],i=a[1]);b[i]=function(){b.push([i].concat(Array.prototype.slice.call(arguments,0)))}}var e=a;"undefined"!==typeof g?e=a[g]=[]:g="mixpanel";e.people=e.people||[];e.toString=function(b){var a="mixpanel";"mixpanel"!==g&&(a+="."+g);b||(a+=" (stub)");return a};e.people.toString=function(){return e.toString(1)+".people (stub)"};l="disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(" ");for(h=0;h<l.length;h++)c(e,l[h]);var f="set_config";for(h=0;h<["group"].length;h++)c(e,f+"_"+["group"][h]);a._i.push([b,d,g])};a.__SV=1.2;b=c.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";d=c.getElementsByTagName("script")[0];d.parentNode.insertBefore(b,d)}})(document,window.mixpanel||[]);
+{% if mixpanel_token %}
+mixpanel.init("{{ mixpanel_token }}", {debug: true, track_pageview: true, persistence: "localStorage"});
+{% if current_user.is_authenticated %}
+mixpanel.identify("{{ current_user.id }}");
+mixpanel.people.set({
+    "$email": "{{ current_user.email }}",
+    "$name": "{{ current_user.name or current_user.email }}",
+    "subscription_plan": "{{ current_user.subscription_plan }}"
+});
+{% endif %}
+{% endif %}
+</script>
+<script src="{{ url_for('static', filename='js/adaptive-practice.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<main class="dashboard-container" role="main" id="main-content"
+      data-user-id="{{ current_user.id if current_user.is_authenticated else '' }}"
+      data-user-email="{{ current_user.email if current_user.is_authenticated else '' }}"
+      data-mixpanel-token="{{ mixpanel_token or '' }}">
+        <section class="welcome-section fade-in">
+            <h1 class="welcome-header">
+                <i class="fas fa-graduation-cap"></i> 
+                <span class="welcome-text">Welcome to PrepForge</span>
+                <span class="username">{{ session.get('user_name', current_user.email) }}</span>
+            </h1>
+
+            <div class="user-profile-card card">
+                <form method="POST" action="{{ url_for('update_name') }}" class="name-form">
+                    <div class="form-group">
+                        <label for="user_name" class="form-label">
+                            <i class="fas fa-user"></i> Your Name
+                        </label>
+                        <input type="text" 
+                               name="user_name" 
+                               id="user_name" 
+                               class="form-control" 
+                               placeholder="Enter your name"
+                               value="{{ session.get('user_name', '') }}">
+                    </div>
+                    <button type="submit" class="btn">
+                        <i class="fas fa-save"></i> Save Name
+                    </button>
+                </form>
+            </div>
+            
+            <!-- User Stats Section -->
+            <div class="stats-section card fade-in">
+                <h2><i class="fas fa-chart-line"></i> Your Progress</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ stats.total_questions }}</div>
+                        <div class="stat-label">Questions Answered</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ stats.accuracy }}%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ stats.current_streak }}</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ stats.badges_count }}</div>
+                        <div class="stat-label">Badges Earned</div>
+                    </div>
+                </div>
+                
+                {% if stats.next_badge %}
+                <div class="next-badge">
+                    <h3>Next Badge: {{ stats.next_badge.name }}</h3>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: {{ stats.next_badge.percentage }}%"></div>
+                    </div>
+                    <div class="progress-label">
+                        {{ stats.next_badge.current }} / {{ stats.next_badge.threshold }} questions
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if stats.recent_badges and stats.recent_badges|length > 0 %}
+                <div class="recent-badges">
+                    <h3>Recent Achievements</h3>
+                    <div class="badges-mini">
+                        {% for badge in stats.recent_badges %}
+                        <div class="badge-mini">
+                            <div class="badge-icon-mini">
+                                <i class="{{ badge.icon }} text-{{ badge.color }}"></i>
+                            </div>
+                            <div class="badge-label-mini">{{ badge.name }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{{ url_for('buddy.view_badges') }}" class="view-all-badges">View All Badges</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Session Recovery Component -->
+            {% include 'session_recovery.html' %}
+
+            {% if not current_user.subscription or not current_user.subscription.active %}
+            <div class="premium-banner card fade-in">
+                <i class="fas fa-crown"></i>
+                <p>You're using the trial version. Upgrade to premium for unlimited questions!</p>
+                <button onclick="window.startEmbeddedCheckout ? window.startEmbeddedCheckout() : alert('Loading checkout...')" 
+                        class="btn btn-primary featured" 
+                        id="dashboard-upgrade-btn"
+                        aria-label="Upgrade to premium subscription for unlimited questions">
+                    <i class="fas fa-arrow-up" aria-hidden="true"></i> Go Premium
+                </button>
+            </div>
+            {% endif %}
+
+            <div class="exam-selection-section">
+                <h2><i class="fas fa-book"></i> Start Practice</h2>
+                <form action="{{ url_for('start_practice') }}" method="POST" class="practice-form">
+                    {{ form.hidden_tag() }}
+                    <div class="exam-select-wrapper">
+                        <label for="exam_type" class="visually-hidden">Choose exam type</label>
+                        <select name="exam_type" 
+                                id="exam_type" 
+                                aria-label="Choose exam type for practice session"
+                                required>
+                            <option value="">Select an exam type...</option>
+                            <option value="GRE">GRE - Graduate Record Exam</option>
+                            <option value="GMAT">GMAT - Graduate Management Test</option>
+                            <option value="MCAT">MCAT - Medical College Admission</option>
+                            <option value="USMLE_STEP_1">USMLE Step 1 - Medical Licensing</option>
+                            <option value="USMLE_STEP_2">USMLE Step 2 - Medical Licensing</option>
+                            <option value="NCLEX">NCLEX - Nursing Licensure</option>
+                            <option value="LSAT">LSAT - Law School Admission</option>
+                            <option value="SAT">SAT - Scholastic Assessment</option>
+                            <option value="ACT">ACT - American College Testing</option>
+                            <option value="IELTS">IELTS - English Language Test</option>
+                            <option value="TOEFL">TOEFL - English as Foreign Language</option>
+                            <option value="PMP">PMP - Project Management Pro</option>
+                            <option value="CFA">CFA - Chartered Financial Analyst</option>
+                        </select>
+                    </div>
+                    <button type="submit" 
+                            class="start-practice-btn" 
+                            data-action="start-practice" 
+                            data-context="dashboard"
+                            aria-label="Begin practice session with selected exam type">
+                        <span class="btn-text">
+                            <i class="fas fa-play" aria-hidden="true"></i> Start Practice
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </section>
+</main>
+
+<script>
+    // Add loading states and animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Enhanced form validation and UX
+        const practiceForm = document.querySelector('.practice-form');
+        if (practiceForm) {
+            practiceForm.addEventListener('submit', function(e) {
+                const examSelect = document.getElementById('exam_type');
+                const submitBtn = practiceForm.querySelector('button[type="submit"]');
+                
+                if (!examSelect.value) {
+                    e.preventDefault();
+                    // Modern mobile-friendly alert
+                    examSelect.focus();
+                    examSelect.style.borderColor = '#ef4444';
+                    examSelect.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                    
+                    setTimeout(() => {
+                        examSelect.style.borderColor = '';
+                        examSelect.style.boxShadow = '';
+                    }, 3000);
+                    
+                    return false;
+                }
+                
+                // Add loading state with modern UX
+                if (submitBtn) {
+                    submitBtn.classList.add('loading');
+                    submitBtn.disabled = true;
+                }
+            });
+            
+            // Real-time validation
+            const examSelect = document.getElementById('exam_type');
+            if (examSelect) {
+                examSelect.addEventListener('change', function() {
+                    const submitBtn = practiceForm.querySelector('button[type="submit"]');
+                    if (this.value && submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = '1';
+                    }
+                });
+            }
+        }
+    });
+</script>
+{% endblock %}

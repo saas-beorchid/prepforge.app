@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Success - PrepForge{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white text-center">
+                    <h3><i class="fas fa-check-circle"></i> Payment Successful!</h3>
+                </div>
+                <div class="card-body text-center">
+                    <h4>Welcome to PrepForge Pro!</h4>
+                    <p class="mb-4">Your subscription has been activated successfully. You now have unlimited access to all practice questions and premium features.</p>
+                    
+                    <div class="alert alert-info">
+                        <strong>What's included in your Pro subscription:</strong>
+                        <ul class="list-unstyled mt-2">
+                            <li><i class="fas fa-check text-success"></i> Unlimited practice questions</li>
+                            <li><i class="fas fa-check text-success"></i> All 13 exam types available</li>
+                            <li><i class="fas fa-check text-success"></i> Advanced analytics and progress tracking</li>
+                            <li><i class="fas fa-check text-success"></i> Priority customer support</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-arrow-right"></i> Start Practicing
+                        </a>
+                        <a href="{{ url_for('quiz') }}" class="btn btn-success btn-lg ml-2">
+                            <i class="fas fa-play"></i> Take a Quiz
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Track successful payment
+if (window.mixpanel && window.mixpanelToken) {
+    mixpanel.track('Payment Successful', {
+        user_id: '{{ current_user.id if current_user.is_authenticated else "anonymous" }}',
+        upgrade_type: 'pro',
+        payment_method: 'stripe'
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Access - PrepForge{% endblock %}
+
+{% block content %}
+<main class="admin-login-container" role="main" id="main-content">
+    <div class="admin-login-card fade-in">
+        <div class="admin-header">
+            <div class="admin-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1>Admin Access Required</h1>
+            <p>Enter admin credentials to access the Intelligence Engine dashboard</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'error' or category == 'danger' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="admin-login-form">
+            <div class="form-group">
+                <label for="password">Admin Password:</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       required 
+                       class="form-control"
+                       placeholder="Enter admin password">
+            </div>
+
+            <button type="submit" class="btn btn-primary" aria-label="Sign in to admin panel">
+                <i class="fas fa-sign-in-alt" aria-hidden="true"></i> Access Admin Panel
+            </button>
+        </form>
+
+        <div class="admin-info">
+            <p><i class="fas fa-info-circle"></i> Admin access provides advanced analytics, user management, and Intelligence Engine controls.</p>
+        </div>
+    </div>
+</main>
+
+<style>
+.admin-login-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.admin-login-card {
+    background: white;
+    padding: 3rem;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    max-width: 450px;
+    width: 100%;
+    text-align: center;
+}
+
+.admin-header {
+    margin-bottom: 2rem;
+}
+
+.admin-icon {
+    font-size: 3rem;
+    color: #4169e1;
+    margin-bottom: 1rem;
+}
+
+.admin-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #121212;
+}
+
+.admin-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.flash-messages {
+    margin-bottom: 1.5rem;
+}
+
+.flash-message {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.flash-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.flash-danger, .flash-error {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.admin-login-form {
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e1e5e9;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4169e1;
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
+}
+
+.btn {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background: #4169e1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn:hover {
+    background: #3557c2;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(65, 105, 225, 0.3);
+}
+
+.admin-info {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 6px;
+    border-left: 4px solid #4169e1;
+}
+
+.admin-info p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+@media (max-width: 600px) {
+    .admin-login-card {
+        padding: 2rem;
+        margin: 1rem;
+    }
+    
+    .admin-header h1 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}

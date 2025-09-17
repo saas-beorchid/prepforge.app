@@ -1,0 +1,255 @@
+/* Modern Mobile Explanation Styling */
+
+/* Enhanced Explanation Container */
+.explanation-container {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin: 1.5rem 0;
+    overflow: hidden;
+    border: 1px solid rgba(65, 105, 225, 0.1);
+}
+
+.explanation-container h3 {
+    background: linear-gradient(135deg, #4169e1, #6b46c1);
+    color: white;
+    margin: 0;
+    padding: 1.25rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.explanation-container h3 i {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* Centered Modern Toggle Buttons */
+.explanation-toggle {
+    display: flex;
+    background: #f8fafc;
+    padding: 0.5rem;
+    gap: 0.5rem;
+    border-radius: 16px;
+    margin: 1.5rem auto;
+    justify-content: center;
+    max-width: 320px;
+    border: 2px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.toggle-btn {
+    flex: 1;
+    background: white;
+    border: 2px solid #e5e7eb;
+    padding: 0.875rem 1.25rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #64748b;
+    cursor: pointer;
+    position: relative;
+    text-align: center;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: capitalize;
+    letter-spacing: 0.025em;
+}
+
+.toggle-btn.active {
+    background: linear-gradient(135deg, #4169e1, #6366f1);
+    color: white;
+    font-weight: 700;
+    border-color: #4169e1;
+    box-shadow: 0 4px 12px rgba(65, 105, 225, 0.4);
+    transform: translateY(-2px) scale(1.02);
+    z-index: 2;
+}
+
+.toggle-btn:not(.active) {
+    background: white;
+    color: #6b7280;
+    border-color: #e5e7eb;
+}
+
+.toggle-btn:not(.active):hover {
+    background: #f9fafb;
+    color: #4169e1;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+/* Explanation Content */
+.explanation-content {
+    padding: 1.5rem;
+    line-height: 1.7;
+    color: #374151;
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.explanation-content.active {
+    display: block;
+}
+
+.explanation-content p {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.explanation-content strong {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .explanation-container {
+        margin: 1rem -0.75rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+    }
+    
+    .explanation-container h3 {
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+    }
+    
+    .explanation-toggle {
+        padding: 0.4rem;
+        gap: 0.4rem;
+        margin: 1rem auto;
+        max-width: 280px;
+    }
+    
+    .toggle-btn {
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+        border-radius: 8px;
+        min-height: 40px;
+    }
+    
+    .explanation-content {
+        padding: 1.25rem;
+        font-size: 0.9rem;
+    }
+    
+    .explanation-content p {
+        margin-bottom: 0.875rem;
+    }
+}
+
+/* Explanation Note Enhancement */
+.explanation-note {
+    background: #fef3cd;
+    border: 1px solid #fbbf24;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.explanation-note::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #f59e0b, #d97706);
+}
+
+.explanation-note p {
+    margin: 0;
+    color: #92400e;
+    font-size: 0.875rem;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.explanation-note p::before {
+    content: '⚠️';
+    font-style: normal;
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .explanation-note {
+        margin: 1rem -0.75rem;
+        border-radius: 8px;
+        padding: 0.875rem 1rem;
+    }
+    
+    .explanation-note p {
+        font-size: 0.8rem;
+    }
+}
+
+/* Animation for content switching */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced Math Content */
+.explanation-content .math {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.75rem 0;
+    border-left: 3px solid #4169e1;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .explanation-content .math {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+        margin: 0.5rem 0;
+    }
+}
+
+/* Interactive Elements */
+.explanation-content ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.explanation-content li {
+    background: #f1f5f9;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    border-left: 3px solid #94a3b8;
+    transition: all 0.2s ease;
+}
+
+.explanation-content li:hover {
+    background: #e2e8f0;
+    border-left-color: #4169e1;
+    transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+    .explanation-content li {
+        padding: 0.625rem;
+        font-size: 0.875rem;
+    }
+}

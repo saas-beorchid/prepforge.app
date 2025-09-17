@@ -1,0 +1,157 @@
+<!-- Session Recovery Component for Dashboard -->
+{% if incomplete_sessions %}
+<div class="session-recovery-section">
+    <div class="recovery-card">
+        <h3><i class="fas fa-clock-rotate-left"></i> Resume Your Practice</h3>
+        <p>You have incomplete practice sessions waiting for you!</p>
+        
+        <div class="incomplete-sessions">
+            {% for session in incomplete_sessions %}
+            <div class="session-item">
+                <div class="session-info">
+                    <div class="session-exam">{{ session.exam_type }}</div>
+                    <div class="session-progress">
+                        <span class="progress-text">{{ session.progress }}</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ (session.get('current_index', 0) / session.get('total_questions', 1) * 100)|round(1) if session.get('total_questions') else 0 }}%"></div>
+                        </div>
+                    </div>
+                    <div class="session-meta">
+                        <span class="time-ago">{{ session.updated_at }}</span>
+                        <span class="questions-left">{{ session.questions_remaining }} questions left</span>
+                    </div>
+                </div>
+                <div class="session-actions">
+                    <form action="{{ url_for('resume_session') }}" method="POST" style="display: inline;">
+                        <input type="hidden" name="session_id" value="{{ session.id }}">
+                        {% if csrf_token %}
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        {% endif %}
+                        <button type="submit" class="btn-resume">
+                            <i class="fas fa-play"></i> Resume
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.session-recovery-section {
+    margin-bottom: 2rem;
+}
+
+.recovery-card {
+    background: linear-gradient(135deg, #4169e1 0%, #6b7fff 100%);
+    color: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.recovery-card h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.recovery-card p {
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.incomplete-sessions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.session-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+}
+
+.session-info {
+    flex: 1;
+}
+
+.session-exam {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.session-progress {
+    margin-bottom: 0.5rem;
+}
+
+.progress-text {
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #d4a859;
+    transition: width 0.3s ease;
+}
+
+.session-meta {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-resume {
+    background: #d4a859;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-resume:hover {
+    background: #c19849;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .session-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .session-actions {
+        width: 100%;
+    }
+    
+    .btn-resume {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endif %}

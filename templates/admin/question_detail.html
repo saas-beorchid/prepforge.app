@@ -1,0 +1,189 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Question Detail | PrepForge Pro Admin{% endblock %}
+
+{% block page_title %}Question Details: {{ question.id }}{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('admin.question_management') }}" class="btn btn-sm btn-primary me-2">
+    <i class="bi bi-arrow-left"></i> Back to Questions
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Question Content Card -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Question Content</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">ID</div>
+                    <div>{{ question.id }}</div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Exam Type</div>
+                    <div>{{ question.exam_type }}</div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Subject</div>
+                    <div>{{ question.subject or 'N/A' }}</div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Difficulty</div>
+                    <div>
+                        {% if question.difficulty == 'easy' %}
+                        <span class="badge bg-success">Easy</span>
+                        {% elif question.difficulty == 'medium' %}
+                        <span class="badge bg-warning text-dark">Medium</span>
+                        {% else %}
+                        <span class="badge bg-danger">Hard</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Question Text</div>
+                    <div class="card bg-light p-3 mt-2">{{ question.question_text|safe }}</div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Answer Choices</div>
+                    <div class="list-group mt-2">
+                        {% for i in range(question.choices|length) %}
+                            {% set letter = chr(65 + i) %}
+                            <div class="list-group-item {% if letter == question.correct_answer %}list-group-item-success{% endif %}">
+                                <strong>{{ letter }}.</strong> {{ question.choices[i] }}
+                                {% if letter == question.correct_answer %}
+                                <span class="badge bg-success float-end">Correct Answer</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                {% if question.explanation %}
+                <div class="mb-4">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Original Explanation</div>
+                    <div class="card bg-light p-3 mt-2">{{ question.explanation|safe }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- AI Explanations -->
+        {% if explanations %}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">AI-Generated Explanations</h6>
+            </div>
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="explanationTabs" role="tablist">
+                    {% for explanation in explanations %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if loop.first %}active{% endif %}" 
+                                id="explanation-{{ loop.index }}-tab" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#explanation-{{ loop.index }}" 
+                                type="button" 
+                                role="tab">
+                            {% if explanation.answered_correctly %}Correct{% else %}Incorrect{% endif %} Answer
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="tab-content mt-3" id="explanationTabsContent">
+                    {% for explanation in explanations %}
+                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                         id="explanation-{{ loop.index }}" 
+                         role="tabpanel">
+                        <div class="mb-3">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Technical Explanation</div>
+                            <div class="card bg-light p-3 mt-2">{{ explanation.technical_explanation|safe }}</div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Simplified Explanation</div>
+                            <div class="card bg-light p-3 mt-2">{{ explanation.simplified_explanation|safe }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Question Stats -->
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Question Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h1>{{ answers_count }}</h1>
+                    <p class="text-muted">Times Answered</p>
+                </div>
+                
+                <div class="text-center mb-4">
+                    <h1>{{ accuracy }}%</h1>
+                    <p class="text-muted">Correct Answer Rate</p>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ accuracy }}%"
+                            aria-valuenow="{{ accuracy }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-4">
+                    <div class="mb-2">Cache Status</div>
+                    {% if is_cached %}
+                    <div class="badge bg-success p-2"><i class="bi bi-check-lg me-1"></i> Cached</div>
+                    {% else %}
+                    <div class="badge bg-secondary p-2"><i class="bi bi-x-lg me-1"></i> Not Cached</div>
+                    {% endif %}
+                </div>
+                
+                <div class="text-center">
+                    <div class="mb-2">AI Explanations</div>
+                    {% if explanations %}
+                    <div class="badge bg-success p-2"><i class="bi bi-check-lg me-1"></i> {{ explanations|length }} Available</div>
+                    {% else %}
+                    <div class="badge bg-secondary p-2"><i class="bi bi-x-lg me-1"></i> None Generated</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Similar Questions -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Similar Questions</h6>
+            </div>
+            <div class="card-body">
+                {% if similar_questions %}
+                <div class="list-group">
+                    {% for similar in similar_questions %}
+                    <a href="{{ url_for('admin.question_detail', question_id=similar.id) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ similar.id }}</h6>
+                            <small>{{ similar.difficulty }}</small>
+                        </div>
+                        <p class="mb-1">{{ similar.question_text[:50] }}{% if similar.question_text|length > 50 %}...{% endif %}</p>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <p>No similar questions found</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

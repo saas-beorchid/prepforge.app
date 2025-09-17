@@ -1,0 +1,959 @@
+{% extends "base.html" %}
+
+{% block title %}Practice - PrepForge{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/practice.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modern-explanations.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/exit-modal.css') }}">
+<!-- Performance optimization: MathJax loaded from base template -->
+<!-- Mixpanel tracking -->
+<script type="text/javascript">
+(function(c,a){if(!a.__SV){var b=window;try{var d,m,j,k=b.location,f=k.hash;d=function(a,b){return(m=a.match(RegExp(b+"=([^&]*)")))?m[1]:null};f&&d(f,"state")&&(j=JSON.parse(decodeURIComponent(d(f,"state"))),"mpeditor"===j.action&&(b.sessionStorage.setItem("_mpcehash",f),history.replaceState(j.desiredHash||"",c.title,k.pathname+k.search)))}catch(n){}var l,h;window.mixpanel=a;a._i=[];a.init=function(b,d,g){function c(b,i){var a=i.split(".");2==a.length&&(b=b[a[0]],i=a[1]);b[i]=function(){b.push([i].concat(Array.prototype.slice.call(arguments,0)))}}var e=a;"undefined"!==typeof g?e=a[g]=[]:g="mixpanel";e.people=e.people||[];e.toString=function(b){var a="mixpanel";"mixpanel"!==g&&(a+="."+g);b||(a+=" (stub)");return a};e.people.toString=function(){return e.toString(1)+".people (stub)"};l="disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(" ");for(h=0;h<l.length;h++)c(e,l[h]);var f="set_config";for(h=0;h<["group"].length;h++)c(e,f+"_"+["group"][h]);a._i.push([b,d,g])};a.__SV=1.2;b=c.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";d=c.getElementsByTagName("script")[0];d.parentNode.insertBefore(b,d)}})(document,window.mixpanel||[]);
+{% if mixpanel_token %}
+mixpanel.init("{{ mixpanel_token }}", {debug: true, track_pageview: true, persistence: "localStorage"});
+{% if current_user.is_authenticated %}
+mixpanel.identify("{{ current_user.id }}");
+mixpanel.people.set({
+    "$email": "{{ current_user.email }}",
+    "$name": "{{ current_user.name or current_user.email }}",
+    "subscription_plan": "{{ current_user.subscription_plan }}"
+});
+{% endif %}
+{% endif %}
+</script>
+<script src="{{ url_for('static', filename='js/adaptive-practice.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<main class="practice-container critical-content" role="main" id="main-content" 
+      data-user-id="{{ current_user.id if current_user.is_authenticated else '' }}"
+      data-user-email="{{ current_user.email if current_user.is_authenticated else '' }}"
+      data-exam-type="{{ session.get('exam_type', '') }}"
+      data-mixpanel-token="{{ mixpanel_token or '' }}">
+      
+<div class="container">
+        {% if buddy_message %}
+        <div class="buddy-message-container fade-in">
+            <div class="buddy-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="buddy-message">
+                <p>{{ buddy_message }}</p>
+                {% if streak > 0 %}
+                <div class="streak-counter">
+                    <i class="fas fa-fire"></i> {{ streak }} day streak
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if new_badges and new_badges|length > 0 %}
+        <div class="new-badges-container fade-in">
+            <h3><i class="fas fa-award"></i> Achievement Unlocked!</h3>
+            <div class="badges-grid">
+                {% for badge in new_badges %}
+                <div class="badge-item">
+                    <div class="badge-icon">
+                        <i class="{{ badge.icon }}"></i>
+                    </div>
+                    <div class="badge-details">
+                        <h4>{{ badge.name }}</h4>
+                        <p>{{ badge.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <a href="{{ url_for('buddy.view_badges') }}" class="badge-link">View All Badges</a>
+        </div>
+        {% endif %}
+        
+        <!-- Practice Navigation Bar -->
+        <div class="practice-nav-bar fade-in">
+            <div class="practice-nav-left">
+                <h2>Question {{ session.current_index + 1 }} of {% if not current_user.subscription or not current_user.subscription.active %}20{% else %}{{ session.question_ids|length }}{% endif %}</h2>
+            </div>
+            <div class="practice-nav-right">
+                {% if session.current_index > 0 %}
+                <a href="{{ url_for('practice.show_question') }}?prev=1" 
+                   class="nav-btn prev-btn"
+                   aria-label="Go to previous question">
+                    <i class="fas fa-chevron-left" aria-hidden="true"></i> Previous
+                </a>
+                {% endif %}
+                
+                {% if session.current_index < session.question_ids|length - 1 %}
+                <a href="{{ url_for('practice.show_question') }}?next=1" 
+                   class="nav-btn next-btn"
+                   aria-label="Go to next question">
+                    Next <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                </a>
+                {% else %}
+                <a href="{{ url_for('practice.exit_practice') }}" 
+                   class="nav-btn finish-btn"
+                   aria-label="Finish practice session">
+                    Finish <i class="fas fa-check" aria-hidden="true"></i>
+                </a>
+                {% endif %}
+                
+                <button type="button" 
+                        class="exit-btn" 
+                        onclick="exitPracticeWithSpinner(this)"
+                        aria-label="Exit practice session">
+                    <span class="btn-text"><i class="fas fa-times" aria-hidden="true"></i> Exit</span>
+                    <span class="btn-spinner" style="display: none;">
+                        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                        <span>Exiting...</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Adaptive Question Controls -->
+        <div class="adaptive-controls-bar fade-in">
+            <div class="controls-left">
+                <button type="button" 
+                        class="btn btn-outline-primary" 
+                        data-action="generate-question"
+                        aria-label="Generate a new adaptive question based on your performance">
+                    <i class="fas fa-plus" aria-hidden="true"></i> Generate Adaptive Question
+                </button>
+                <span class="difficulty-indicator" id="difficulty-indicator">
+                    {% if session.get('current_difficulty') %}
+                        Current: {{ session.get('current_difficulty').title() }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="controls-right">
+                <div class="user-score" id="user-score">
+                    {% if session.get('user_score') %}
+                        Score: {{ "%.1f"|format(session.get('user_score')) }}%
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="question-card fade-in">
+            <div class="question-header">
+                <div class="question-meta">
+                    <span class="question-type">{{ session.get('exam_type', 'Practice') }}</span>
+                    {% if session.get('current_topic') %}
+                    <span class="question-topic">{{ session.get('current_topic').title() }}</span>
+                    {% endif %}
+                    {% if question.difficulty %}
+                    <span class="question-difficulty difficulty-{{ question.difficulty }}">
+                        {{ question.difficulty.title() }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="question-text">
+                <span class="math">{{ question.question_text|safe }}</span>
+            </div>
+
+            <form method="POST" action="{{ url_for('practice.submit_answer') }}" class="options-form">
+                {% if form %}
+                    {{ form.hidden_tag() }}
+                {% else %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                {% endif %}
+                <!-- Debug information for choices -->
+                <div style="display:none;">
+                    Question has {{ question.choices|length }} choices available.
+                    {% if choices %}Choices list has {{ choices|length }} items.{% endif %}
+                </div>
+                
+                {% if choices and choices|length > 0 %}
+                    {% for value, label in choices %}
+                    <div class="option {% if show_feedback and value == question.correct_answer %}correct-option{% elif show_feedback and user_answer == value %}incorrect-option{% endif %}">
+                        <input type="radio" 
+                               name="answer" 
+                               value="{{ value }}"
+                               id="option{{ loop.index0 }}"
+                               {% if user_answer == value %}checked{% endif %}
+                               {% if show_feedback %}disabled{% endif %}
+                               required>
+                        <label for="option{{ loop.index0 }}" class="option-text">
+                            <span class="option-content math">{{ label|safe }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    {% for i in range(question.choices|length) %}
+                    <div class="option {% if show_feedback and (65 + i)|chr == question.correct_answer %}correct-option{% elif show_feedback and user_answer == (65 + i)|chr %}incorrect-option{% endif %}">
+                        <input type="radio" 
+                               name="answer" 
+                               value="{{ (65 + i)|chr }}"
+                               id="option{{ i }}"
+                               {% if user_answer == (65 + i)|chr %}checked{% endif %}
+                               {% if show_feedback %}disabled{% endif %}
+                               required>
+                        <label for="option{{ i }}" class="option-text">
+                            <span class="option-content math">{{ question.choices[i]|safe }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if not show_feedback %}
+                <button type="submit" 
+                        class="btn btn-primary submit-answer-btn"
+                        aria-label="Submit your selected answer">
+                    <span class="btn-text">Submit Answer</span>
+                    <span class="btn-spinner" style="display: none;">
+                        <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+                        <span>Submitting Answer...</span>
+                    </span>
+                </button>
+                {% endif %}
+                
+                {% if show_feedback %}
+                <div class="navigation-buttons">
+                    {% if session.current_index > 0 %}
+                    <a href="{{ url_for('practice.show_question') }}?prev=1" 
+                       class="btn btn-secondary nav-btn"
+                       aria-label="Go to previous question">
+                        <i class="fas fa-arrow-left" aria-hidden="true"></i> Previous
+                    </a>
+                    {% endif %}
+                    
+                    {% if session.current_index < session.question_ids|length - 1 %}
+                    <a href="{{ url_for('practice.show_question') }}?next=1" 
+                       class="btn btn-primary nav-btn"
+                       aria-label="Go to next question">
+                        Next <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('practice.exit_practice') }}" 
+                       class="btn btn-success nav-btn"
+                       aria-label="Finish practice session and view results">
+                        Finish <i class="fas fa-check" aria-hidden="true"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </form>
+
+            {% if show_feedback %}
+            <div class="feedback-container fade-in">
+                <p class="feedback {% if session.is_correct %}correct{% else %}incorrect{% endif %}">
+                    <i class="fas fa-{% if session.is_correct %}check{% else %}times{% endif %}-circle"></i>
+                    {% if session.is_correct %}Correct!{% else %}Incorrect{% endif %}
+                </p>
+                
+                <div class="answer-detail">
+                    <p class="correct-answer">
+                        <strong>Correct answer:</strong> {{ question.choices[question.correct_answer|ord - 65]|safe }}
+                    </p>
+                    
+                    {% if not session.is_correct %}
+                    <p class="your-answer">
+                        <strong>Your answer:</strong> {{ question.choices[user_answer|ord - 65]|safe }}
+                    </p>
+                    
+                    <!-- Contest Answer Button -->
+                    <div class="contest-section">
+                        <button type="button" class="contest-btn" onclick="showContestForm()">
+                            <i class="fas fa-flag"></i> Contest This Answer
+                        </button>
+                        <p class="contest-hint">Disagree with this result? Show us your work!</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Original explanation if available -->
+                {% if question.explanation %}
+                <div class="explanation">
+                    <h3>Explanation:</h3>
+                    {% if question.explanation is string %}
+                        <div class="explanation-text math">{{ question.explanation|safe }}</div>
+                    {% else %}
+                        <ul class="choice-explanations">
+                            {% for i in range(question.choices|length) %}
+                            <li class="choice-explanation {% if (65 + i)|chr == question.correct_answer %}correct-choice{% endif %}">
+                                <strong>{{ (65 + i)|chr }}:</strong> 
+                                <span class="math">{{ question.explanation[i]|safe if question.explanation is iterable else question.explanation|safe }}</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    
+                    <div class="concept-highlight">
+                        <h4><i class="fas fa-lightbulb"></i> Key Concept</h4>
+                        <p>This question tests your understanding of 
+                        {% if question.subject %}{{ question.subject }}{% else %}the exam material{% endif %}.</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Additional explanations -->
+                {% if tech_explanation or simple_explanation %}
+                <div class="explanation-container">
+                    <h3><i class="fas fa-lightbulb"></i> Explanation:</h3>
+                    
+                    <div class="explanation-toggle">
+                        <button id="techBtn" class="toggle-btn active" onclick="showExplanation('technical')">Technical</button>
+                        <button id="simpleBtn" class="toggle-btn" onclick="showExplanation('simplified')">Simplified</button>
+                    </div>
+                    
+                    <div id="technicalExplanation" class="explanation-content math active">
+                        {{ tech_explanation|safe }}
+                    </div>
+                    
+                    <div id="simplifiedExplanation" class="explanation-content math">
+                        {{ simple_explanation|safe }}
+                    </div>
+                </div>
+                
+                <div class="explanation-note">
+                    <p><em>Explanations are generated automatically and may not always be perfect.</em></p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <!-- Contest Form Modal -->
+            <div id="contestModal" class="contest-modal" style="display: none;">
+                <div class="contest-modal-content">
+                    <div class="contest-modal-header">
+                        <h3><i class="fas fa-flag"></i> Contest This Answer</h3>
+                        <button type="button" class="contest-close" onclick="hideContestForm()">&times;</button>
+                    </div>
+                    
+                    <form action="{{ url_for('practice.submit_contest') }}" method="POST" class="contest-form">
+                        {% if form %}
+                            {{ form.hidden_tag() }}
+                        {% else %}
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                        {% endif %}
+                        <input type="hidden" name="question_id" value="{{ question.id if question else '' }}">
+                        <input type="hidden" name="user_answer" value="{{ user_answer if user_answer else '' }}">
+                        <input type="hidden" name="correct_answer" value="{{ question.correct_answer if question else '' }}">
+                        
+                        <div class="contest-question-summary">
+                            <h4>Question Summary:</h4>
+                            <p><strong>Your Answer:</strong> {{ user_answer if user_answer else 'N/A' }}</p>
+                            <p><strong>System Answer:</strong> {{ question.correct_answer if question else 'N/A' }}</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="user_work" class="form-label required">
+                                <i class="fas fa-pencil-alt"></i> Show Your Work
+                            </label>
+                            <textarea name="user_work" 
+                                      id="user_work" 
+                                      class="form-control" 
+                                      rows="6" 
+                                      placeholder="Please provide detailed step-by-step work showing how you arrived at your answer. Include calculations, formulas, reasoning, etc."
+                                      required
+                                      minlength="10"></textarea>
+                            <small class="form-text">Minimum 10 characters required</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="reason" class="form-label">
+                                <i class="fas fa-comment"></i> Why Do You Believe Your Answer Is Correct?
+                            </label>
+                            <textarea name="reason" 
+                                      id="reason" 
+                                      class="form-control" 
+                                      rows="3" 
+                                      placeholder="Optional: Explain why you think the system's answer is wrong or provide additional context."></textarea>
+                        </div>
+                        
+                        <div class="contest-modal-footer">
+                            <button type="button" class="btn btn-secondary" onclick="hideContestForm()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Submit Contest
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+</main>
+
+<!-- CSS for Practice Navigation -->
+<style>
+.practice-nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #121212;
+    color: white;
+    padding: 1rem 2rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.practice-nav-left h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.practice-nav-right {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.nav-btn {
+    background: #4169e1;
+    color: white !important;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: #3557c2;
+    color: white !important;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.nav-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.nav-btn.prev-btn {
+    background: #4169e1;
+}
+
+.nav-btn.prev-btn:hover {
+    background: #3557c2;
+}
+
+.nav-btn.finish-btn {
+    background: #28a745;
+}
+
+.nav-btn.finish-btn:hover {
+    background: #218838;
+}
+
+.exit-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.exit-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .practice-nav-bar {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .practice-nav-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .nav-btn, .exit-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 0.75rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Navigation buttons in feedback area */
+.navigation-buttons {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.navigation-buttons .nav-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .navigation-buttons {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .navigation-buttons .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+    // Navigation functionality removed - simplified exam flow
+    
+    // Exit practice functionality with humor and session preservation
+    function exitPractice() {
+        const exitMessages = [
+            "Are you sure you want to leave? The questions will miss you! 😢",
+            "Going already? But we were just getting started! 🚀",
+            "Exit? But you're on fire! Well, maybe just warm... 🔥",
+            "Really leaving? Your brain was just getting warmed up! 🧠",
+            "You sure? These questions won't study themselves... 📚",
+            "Exit confirmed! Come back soon - we'll be waiting! ✨"
+        ];
+        
+        const randomMessage = exitMessages[Math.floor(Math.random() * exitMessages.length)];
+        
+        if (confirm(randomMessage)) {
+            // Use the proper exit route that handles session preservation
+            window.location.href = "{{ url_for('practice.exit_practice') }}";
+        }
+    }
+    
+    // Contest form functionality
+    function showContestForm() {
+        document.getElementById('contestModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent background scroll
+    }
+    
+    function hideContestForm() {
+        document.getElementById('contestModal').style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scroll
+        
+        // Clear form
+        document.getElementById('user_work').value = '';
+        document.getElementById('reason').value = '';
+    }
+
+    // Explanation toggle functionality
+    function showExplanation(type) {
+        const techBtn = document.getElementById('techBtn');
+        const simpleBtn = document.getElementById('simpleBtn');
+        const techContent = document.getElementById('technicalExplanation');
+        const simpleContent = document.getElementById('simplifiedExplanation');
+        
+        if (techBtn && simpleBtn && techContent && simpleContent) {
+            if (type === 'technical') {
+                techBtn.classList.add('active');
+                simpleBtn.classList.remove('active');
+                techContent.classList.add('active');
+                simpleContent.classList.remove('active');
+            } else {
+                simpleBtn.classList.add('active');
+                techBtn.classList.remove('active');
+                simpleContent.classList.add('active');
+                techContent.classList.remove('active');
+            }
+        }
+    }
+
+    // Add loading spinner functionality
+    function showButtonLoading(button) {
+        if (button) {
+            button.classList.add('loading');
+        }
+    }
+
+    function hideButtonLoading(button) {
+        if (button) {
+            button.classList.remove('loading');
+        }
+    }
+
+    // Handle form submission with loading
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle answer submission
+        const answerForm = document.querySelector('.options-form');
+        const submitBtn = document.querySelector('.submit-answer-btn');
+        
+        if (answerForm && submitBtn) {
+            answerForm.addEventListener('submit', function(e) {
+                // Ensure an option is selected before showing loading
+                const selectedOption = answerForm.querySelector('input[name="answer"]:checked');
+                if (selectedOption) {
+                    showButtonLoading(submitBtn);
+                    // Add a small delay to show the loading state
+                    setTimeout(function() {
+                        // The form will submit after this delay
+                    }, 100);
+                }
+            });
+        }
+
+        // Handle navigation buttons with loading state
+        document.querySelectorAll('.nav-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault(); // Prevent immediate navigation
+                showButtonLoading(this);
+                
+                // Navigate after showing loading state
+                const href = this.getAttribute('href');
+                setTimeout(function() {
+                    window.location.href = href;
+                }, 150);
+            });
+        });
+
+        // Initialize explanation tabs - show technical by default
+        const techContent = document.getElementById('technicalExplanation');
+        const simpleContent = document.getElementById('simplifiedExplanation');
+        const techBtn = document.getElementById('techBtn');
+        const simpleBtn = document.getElementById('simpleBtn');
+        
+        if (techContent && techBtn && simpleContent && simpleBtn) {
+            techContent.classList.add('active');
+            techBtn.classList.add('active');
+            simpleContent.classList.remove('active');
+            simpleBtn.classList.remove('active');
+        }
+
+        // Initialize MathJax after toggling explanations
+        const toggleBtns = document.querySelectorAll('.toggle-btn');
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Wait for content to be visible before refreshing MathJax
+                setTimeout(() => {
+                    if (typeof MathJax !== 'undefined') {
+                        MathJax.typeset();
+                    }
+                }, 50);
+            });
+        });
+    });
+    
+    // Close modal when clicking outside
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('contestModal');
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    hideContestForm();
+                }
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Explanation toggle styles */
+    .ai-explanation-container {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #6c63ff;
+    }
+    
+    .explanation-toggle {
+        display: flex;
+        margin-bottom: 15px;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        width: fit-content;
+    }
+    
+    .toggle-btn {
+        padding: 8px 16px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+        outline: none;
+    }
+    
+    .toggle-btn.active {
+        background-color: #6c63ff;
+        color: white;
+    }
+    
+    .explanation-content {
+        display: none;
+        padding: 15px;
+        background-color: white;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        line-height: 1.6;
+    }
+    
+    .explanation-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .explanation-note {
+        margin-top: 15px;
+        font-size: 0.85rem;
+        color: #666;
+        text-align: right;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    /* Contest Button and Modal Styles */
+    .contest-section {
+        margin-top: 15px;
+        padding: 15px;
+        background: #fff3cd;
+        border-radius: 6px;
+        border-left: 4px solid #ffc107;
+    }
+    
+    .contest-btn {
+        background: #ffc107;
+        color: #212529;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .contest-btn:hover {
+        background: #e0a800;
+        transform: translateY(-1px);
+    }
+    
+    .contest-hint {
+        margin: 8px 0 0 0;
+        font-size: 0.8rem;
+        color: #856404;
+        font-style: italic;
+    }
+    
+    .contest-modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+    
+    .contest-modal-content {
+        background: white;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: modalSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    .contest-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 25px 15px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .contest-modal-header h3 {
+        margin: 0;
+        color: #333;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .contest-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+    }
+    
+    .contest-close:hover {
+        background: #f5f5f5;
+        color: #333;
+    }
+    
+    .contest-form {
+        padding: 0 25px 25px;
+    }
+    
+    .contest-question-summary {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #6c757d;
+    }
+    
+    .contest-question-summary h4 {
+        margin: 0 0 10px 0;
+        color: #495057;
+        font-size: 1.1rem;
+    }
+    
+    .contest-question-summary p {
+        margin: 5px 0;
+        color: #6c757d;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+    
+    .form-label.required::after {
+        content: ' *';
+        color: #dc3545;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        transition: border-color 0.2s ease;
+        box-sizing: border-box;
+        resize: vertical;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #4169e1;
+        box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
+    }
+    
+    .form-text {
+        display: block;
+        margin-top: 5px;
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .contest-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .contest-modal-footer .btn {
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .contest-modal-footer .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .contest-modal-footer .btn-secondary:hover {
+        background: #5a6268;
+    }
+    
+    .contest-modal-footer .btn-primary {
+        background: #4169e1;
+        color: white;
+    }
+    
+    .contest-modal-footer .btn-primary:hover {
+        background: #3557c2;
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .contest-modal-content {
+            margin: 10px;
+            max-height: 95vh;
+        }
+        
+        .contest-modal-header,
+        .contest-form {
+            padding: 15px 20px;
+        }
+        
+        .contest-modal-footer {
+            flex-direction: column;
+        }
+        
+        .contest-modal-footer .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}

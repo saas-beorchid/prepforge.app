@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block title %}Strategic Intelligence Engine Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Strategic Intelligence Engine Dashboard</h1>
+            <p class="lead">5-Layer Framework for Continuous Question Generation</p>
+        </div>
+    </div>
+
+    <!-- Framework Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">5-Layer Strategic Framework</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="layer-card border border-info rounded p-3">
+                                <h6 class="text-info">Layer 1: Content Framework</h6>
+                                <p class="small">Defines standards and templates for each exam type</p>
+                                <span class="badge badge-info">Standards</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="layer-card border border-success rounded p-3">
+                                <h6 class="text-success">Layer 2: AI Generation Engine</h6>
+                                <p class="small">Creates questions using OpenAI API</p>
+                                <span class="badge badge-success">Generation</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="layer-card border border-warning rounded p-3">
+                                <h6 class="text-warning">Layer 3: Quality Validation</h6>
+                                <p class="small">Ensures content meets quality standards</p>
+                                <span class="badge badge-warning">Validation</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="layer-card border border-purple rounded p-3">
+                                <h6 class="text-purple">Layer 4: Adaptive Personalization</h6>
+                                <p class="small">Tailors content to individual user ability</p>
+                                <span class="badge badge-purple">Personalization</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="layer-card border border-danger rounded p-3">
+                                <h6 class="text-danger">Layer 5: Continuous Learning</h6>
+                                <p class="small">Improves system based on performance data</p>
+                                <span class="badge badge-danger">Optimization</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generation Controls -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Generate Questions</h5>
+                </div>
+                <div class="card-body">
+                    <form id="generateQuestionsForm">
+                        <div class="form-group">
+                            <label for="examType">Exam Type</label>
+                            <select class="form-control" id="examType" required>
+                                <option value="">Select exam type...</option>
+                                <option value="GMAT">GMAT</option>
+                                <option value="GRE">GRE</option>
+                                <option value="MCAT">MCAT</option>
+                                <option value="USMLE_STEP_1">USMLE Step 1</option>
+                                <option value="USMLE_STEP_2">USMLE Step 2</option>
+                                <option value="NCLEX">NCLEX</option>
+                                <option value="LSAT">LSAT</option>
+                                <option value="SAT">SAT</option>
+                                <option value="ACT">ACT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="questionCount">Number of Questions</label>
+                            <input type="number" class="form-control" id="questionCount" min="1" max="20" value="5">
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="generateBtn">
+                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            Generate Questions
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>User Analytics</h5>
+                </div>
+                <div class="card-body">
+                    <div id="userAnalytics">
+                        <p class="text-muted">Select an exam type to view analytics</p>
+                    </div>
+                    <button class="btn btn-info btn-sm" id="refreshAnalytics">Refresh Analytics</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Performance (Admin Only) -->
+    {% if current_user.is_admin %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">System Performance (Admin Only)</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Performance Metrics</h6>
+                            <div id="systemPerformance">
+                                <p class="text-muted">Loading performance data...</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Optimization Recommendations</h6>
+                            <div id="optimizationData">
+                                <p class="text-muted">Loading optimization data...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-warning btn-sm" id="refreshSystemData">Refresh System Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Generated Questions Display -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Generated Questions</h5>
+                </div>
+                <div class="card-body">
+                    <div id="generatedQuestions">
+                        <p class="text-muted">Generated questions will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.layer-card {
+    height: 100%;
+    transition: transform 0.2s;
+}
+
+.layer-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.text-purple {
+    color: #6f42c1 !important;
+}
+
+.border-purple {
+    border-color: #6f42c1 !important;
+}
+
+.badge-purple {
+    background-color: #6f42c1;
+}
+
+.question-preview {
+    border-left: 4px solid #007bff;
+    padding-left: 15px;
+    margin-bottom: 20px;
+}
+
+.analytics-metric {
+    text-align: center;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.metric-value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.metric-label {
+    font-size: 0.9em;
+    color: #6c757d;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateForm = document.getElementById('generateQuestionsForm');
+    const examTypeSelect = document.getElementById('examType');
+    const generateBtn = document.getElementById('generateBtn');
+    const refreshAnalyticsBtn = document.getElementById('refreshAnalytics');
+    const refreshSystemBtn = document.getElementById('refreshSystemData');
+
+    // Generate questions
+    generateForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const examType = document.getElementById('examType').value;
+        const count = document.getElementById('questionCount').value;
+        
+        if (!examType) {
+            alert('Please select an exam type');
+            return;
+        }
+
+        // Show loading state
+        generateBtn.disabled = true;
+        generateBtn.querySelector('.spinner-border').classList.remove('d-none');
+        
+        try {
+            const response = await fetch('/api/generate-questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    exam_type: examType,
+                    count: parseInt(count)
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                displayGeneratedQuestions(data.questions);
+                alert(`Successfully generated ${data.questions_generated} questions!`);
+            } else {
+                alert(`Error: ${data.error}`);
+            }
+        } catch (error) {
+            console.error('Error generating questions:', error);
+            alert('Failed to generate questions. Please try again.');
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.querySelector('.spinner-border').classList.add('d-none');
+        }
+    });
+
+    // Refresh analytics when exam type changes
+    examTypeSelect.addEventListener('change', function() {
+        if (this.value) {
+            loadUserAnalytics(this.value);
+        }
+    });
+
+    // Refresh analytics button
+    refreshAnalyticsBtn.addEventListener('click', function() {
+        const examType = examTypeSelect.value;
+        if (examType) {
+            loadUserAnalytics(examType);
+        }
+    });
+
+    // Refresh system data (admin only)
+    if (refreshSystemBtn) {
+        refreshSystemBtn.addEventListener('click', loadSystemPerformance);
+        loadSystemPerformance(); // Load on page load
+    }
+
+    async function loadUserAnalytics(examType) {
+        try {
+            const response = await fetch(`/api/user-analytics?exam_type=${examType}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                displayUserAnalytics(data.analytics);
+            }
+        } catch (error) {
+            console.error('Error loading analytics:', error);
+        }
+    }
+
+    async function loadSystemPerformance() {
+        try {
+            const response = await fetch('/api/system-performance');
+            const data = await response.json();
+            
+            if (data.success) {
+                displaySystemPerformance(data.performance, data.optimization);
+            }
+        } catch (error) {
+            console.error('Error loading system performance:', error);
+        }
+    }
+
+    function displayGeneratedQuestions(questions) {
+        const container = document.getElementById('generatedQuestions');
+        
+        if (!questions || questions.length === 0) {
+            container.innerHTML = '<p class="text-muted">No questions generated.</p>';
+            return;
+        }
+
+        let html = '';
+        questions.forEach((question, index) => {
+            html += `
+                <div class="question-preview">
+                    <h6>Question ${index + 1}</h6>
+                    <p><strong>Difficulty:</strong> ${question.difficulty}/5</p>
+                    <p><strong>Topic:</strong> ${question.topic_area}</p>
+                    <p>${question.question_text.substring(0, 200)}${question.question_text.length > 200 ? '...' : ''}</p>
+                    <small class="text-muted">Generated at: ${new Date(question.generated_at).toLocaleString()}</small>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+
+    function displayUserAnalytics(analytics) {
+        const container = document.getElementById('userAnalytics');
+        
+        const html = `
+            <div class="row">
+                <div class="col-6">
+                    <div class="analytics-metric">
+                        <div class="metric-value">${analytics.current_level}</div>
+                        <div class="metric-label">Current Level</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="analytics-metric">
+                        <div class="metric-value">${(analytics.accuracy_rate * 100).toFixed(1)}%</div>
+                        <div class="metric-label">Accuracy Rate</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="analytics-metric">
+                        <div class="metric-value">${analytics.questions_answered}</div>
+                        <div class="metric-label">Questions Answered</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="analytics-metric">
+                        <div class="metric-value">${analytics.learning_velocity.toFixed(1)}x</div>
+                        <div class="metric-label">Learning Velocity</div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <h6>Improvement Areas:</h6>
+                <div class="text-muted">
+                    ${analytics.improvement_areas.length > 0 ? 
+                        analytics.improvement_areas.join(', ') : 
+                        'All areas performing well'
+                    }
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+    }
+
+    function displaySystemPerformance(performance, optimization) {
+        const perfContainer = document.getElementById('systemPerformance');
+        const optContainer = document.getElementById('optimizationData');
+        
+        if (performance.status === 'insufficient_data') {
+            perfContainer.innerHTML = '<p class="text-warning">Insufficient data for analysis</p>';
+            optContainer.innerHTML = '<p class="text-muted">No optimization recommendations available</p>';
+            return;
+        }
+
+        const perfHtml = `
+            <div class="small">
+                <p><strong>Total Questions Served:</strong> ${performance.total_questions_served}</p>
+                <p><strong>Average Accuracy:</strong> ${(performance.average_accuracy * 100).toFixed(1)}%</p>
+                <p><strong>Problem Questions:</strong> ${performance.problem_questions}</p>
+            </div>
+        `;
+        
+        const optHtml = `
+            <div class="small">
+                ${optimization.status === 'optimized' ? 
+                    `<ul class="list-unstyled">
+                        ${Object.entries(optimization.changes || {}).map(([key, value]) => 
+                            `<li>• ${key}: ${JSON.stringify(value)}</li>`
+                        ).join('')}
+                    </ul>` :
+                    '<p class="text-muted">No optimization needed</p>'
+                }
+            </div>
+        `;
+        
+        perfContainer.innerHTML = perfHtml;
+        optContainer.innerHTML = optHtml;
+    }
+});
+</script>
+{% endblock %}

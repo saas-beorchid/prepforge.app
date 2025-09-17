@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - PrepForge{% endblock %}
+
+{% block content %}
+<main class="error-container" role="main" id="main-content">
+    <div class="error-card fade-in">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <h1 class="error-title">500 - Server Hiccup!</h1>
+        
+        <div class="error-messages">
+            <p id="random-message" class="error-message"></p>
+        </div>
+        
+        <div class="error-actions">
+            <button onclick="location.reload()" class="btn btn-primary">
+                <i class="fas fa-sync-alt"></i> Try Again
+            </button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</main>
+
+<style>
+.error-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.error-card {
+    text-align: center;
+    max-width: 500px;
+    background: white;
+    padding: 3rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.error-icon {
+    font-size: 4rem;
+    color: #dc3545;
+    margin-bottom: 2rem;
+}
+
+.error-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: #121212;
+}
+
+.error-message {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: transparent;
+}
+
+.btn-primary {
+    background: #4169e1;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #3557c2;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #666;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #555;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+    .error-card {
+        padding: 2rem;
+    }
+    
+    .error-title {
+        font-size: 2rem;
+    }
+    
+    .error-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 250px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const funnyMessages = [
+        "Our servers are having a coffee break! They'll be back soon! ☕",
+        "Something went wonky behind the scenes. We're on it! 🔧",
+        "The hamsters powering our servers need a quick snack break! 🐹",
+        "Our code is having an existential crisis. Give us a moment! 🤖",
+        "Error 500: The server just sneezed. Bless you, server! 🤧",
+        "We're currently teaching our servers some new tricks. Be right back! 🎪",
+        "The server is doing yoga stretches. Very zen, very necessary! 🧘",
+        "Our data is playing musical chairs and forgot where to sit! 🎵",
+        "The server is having a moment of reflection. It'll snap out of it! 💭",
+        "Internal server error - translation: our computer needs a hug! 🤗"
+    ];
+    
+    const randomMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+    document.getElementById('random-message').textContent = randomMessage;
+});
+</script>
+{% endblock %}

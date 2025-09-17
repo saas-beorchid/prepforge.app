@@ -1,0 +1,370 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Analytics | PrepForge Pro Admin{% endblock %}
+
+{% block page_title %}Analytics Dashboard{% endblock %}
+
+{% block header_actions %}
+<div class="btn-group">
+    <a href="{{ url_for('admin.analytics', days=7) }}" class="btn btn-sm {% if days == 7 %}btn-primary{% else %}btn-outline-primary{% endif %}">Last 7 Days</a>
+    <a href="{{ url_for('admin.analytics', days=30) }}" class="btn btn-sm {% if days == 30 %}btn-primary{% else %}btn-outline-primary{% endif %}">Last 30 Days</a>
+    <a href="{{ url_for('admin.analytics', days=90) }}" class="btn btn-sm {% if days == 90 %}btn-primary{% else %}btn-outline-primary{% endif %}">Last 90 Days</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Daily Activity Chart -->
+    <div class="col-12 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Daily Activity</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="dailyActivityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Exam Popularity -->
+    <div class="col-md-7 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Exam Popularity & Performance</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 400px;">
+                    <canvas id="examPopularityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Premium vs Trial Users -->
+    <div class="col-md-5 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Premium vs Trial Users</h6>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <h5 class="text-center">Premium Users</h5>
+                        <div class="text-center my-3">
+                            <h2>{{ premium_stats.users or 0 }}</h2>
+                            <div class="text-muted">Active Users</div>
+                        </div>
+                        <div class="text-center mb-3">
+                            <h2>{{ premium_stats.answers or 0 }}</h2>
+                            <div class="text-muted">Questions Answered</div>
+                        </div>
+                        <div class="text-center">
+                            <h2>{{ (premium_stats.accuracy or 0)|round(1) }}%</h2>
+                            <div class="text-muted">Accuracy Rate</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-center">Trial Users</h5>
+                        <div class="text-center my-3">
+                            <h2>{{ trial_stats.users or 0 }}</h2>
+                            <div class="text-muted">Active Users</div>
+                        </div>
+                        <div class="text-center mb-3">
+                            <h2>{{ trial_stats.answers or 0 }}</h2>
+                            <div class="text-muted">Questions Answered</div>
+                        </div>
+                        <div class="text-center">
+                            <h2>{{ (trial_stats.accuracy or 0)|round(1) }}%</h2>
+                            <div class="text-muted">Accuracy Rate</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5 class="text-center mt-4">Questions Per User</h5>
+                <div class="row text-center mt-3">
+                    <div class="col-6">
+                        <h3>{{ (premium_stats.answers / premium_stats.users)|round(1) if premium_stats.users else 0 }}</h3>
+                        <p class="text-muted">Premium Avg</p>
+                    </div>
+                    <div class="col-6">
+                        <h3>{{ (trial_stats.answers / trial_stats.users)|round(1) if trial_stats.users else 0 }}</h3>
+                        <p class="text-muted">Trial Avg</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- User Retention -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">User Retention</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="retentionChart"></canvas>
+                </div>
+                <div class="text-center text-muted mt-3">
+                    Number of users by days of activity
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- API Usage -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Analytics Summary</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Active Users
+                        </div>
+                        <div class="h2 mb-0 font-weight-bold text-gray-800">
+                            {{ (premium_stats.users or 0) + (trial_stats.users or 0) }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Questions Answered
+                        </div>
+                        <div class="h2 mb-0 font-weight-bold text-gray-800">
+                            {{ (premium_stats.answers or 0) + (trial_stats.answers or 0) }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Premium Conversion
+                        </div>
+                        {% set premium_ratio = (premium_stats.users / (premium_stats.users + trial_stats.users) * 100) if premium_stats.users + trial_stats.users > 0 else 0 %}
+                        <div class="h2 mb-0 font-weight-bold text-gray-800">
+                            {{ premium_ratio|round(1) }}%
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Overall Accuracy
+                        </div>
+                        {% set total_accuracy = ((premium_stats.accuracy or 0) * (premium_stats.answers or 0) + (trial_stats.accuracy or 0) * (trial_stats.answers or 0)) / ((premium_stats.answers or 0) + (trial_stats.answers or 0)) if (premium_stats.answers or 0) + (trial_stats.answers or 0) > 0 else 0 %}
+                        <div class="h2 mb-0 font-weight-bold text-gray-800">
+                            {{ total_accuracy|round(1) }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Daily Activity Chart
+    const activityCtx = document.getElementById('dailyActivityChart').getContext('2d');
+    new Chart(activityCtx, {
+        type: 'line',
+        data: {
+            labels: {{ dates|safe }},
+            datasets: [
+                {
+                    label: 'Questions Answered',
+                    data: {{ daily_answers|safe }},
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointBorderColor: '#fff',
+                    tension: 0.1,
+                    borderWidth: 2,
+                    fill: true,
+                    yAxisID: 'y',
+                },
+                {
+                    label: 'Active Users',
+                    data: {{ daily_users|safe }},
+                    backgroundColor: 'rgba(28, 200, 138, 0.05)',
+                    borderColor: 'rgba(28, 200, 138, 1)',
+                    pointBackgroundColor: 'rgba(28, 200, 138, 1)',
+                    pointBorderColor: '#fff',
+                    tension: 0.1,
+                    borderWidth: 2,
+                    fill: true,
+                    yAxisID: 'y1',
+                },
+                {
+                    label: 'Accuracy (%)',
+                    data: {{ daily_accuracy|safe }},
+                    backgroundColor: 'rgba(246, 194, 62, 0.05)',
+                    borderColor: 'rgba(246, 194, 62, 1)',
+                    pointBackgroundColor: 'rgba(246, 194, 62, 1)',
+                    pointBorderColor: '#fff',
+                    tension: 0.1,
+                    borderWidth: 2,
+                    fill: false,
+                    yAxisID: 'y2',
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Questions'
+                    }
+                },
+                y1: {
+                    beginAtZero: true,
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Users'
+                    }
+                },
+                y2: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    min: 0,
+                    max: 100,
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Accuracy %'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Exam Popularity Chart
+    const examCtx = document.getElementById('examPopularityChart').getContext('2d');
+    new Chart(examCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ exam_names|safe }},
+            datasets: [
+                {
+                    label: 'Questions Answered',
+                    data: {{ exam_counts|safe }},
+                    backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Accuracy (%)',
+                    data: {{ exam_accuracy|safe }},
+                    type: 'line',
+                    backgroundColor: 'rgba(246, 194, 62, 0.05)',
+                    borderColor: 'rgba(246, 194, 62, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(246, 194, 62, 1)',
+                    pointBorderColor: '#fff',
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Questions Answered'
+                    }
+                },
+                y1: {
+                    position: 'right',
+                    beginAtZero: true,
+                    min: 0,
+                    max: 100,
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Accuracy %'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Retention Chart
+    const retentionCtx = document.getElementById('retentionChart').getContext('2d');
+    new Chart(retentionCtx, {
+        type: 'bar',
+        data: {
+            labels: ['1 Day', '2 Days', '3 Days', '4+ Days', '7+ Days', '14+ Days'],
+            datasets: [{
+                label: 'Users',
+                data: [
+                    {{ retention_counts[1] }}, 
+                    {{ retention_counts[2] }}, 
+                    {{ retention_counts[3] }}, 
+                    {{ retention_counts['4+'] }}, 
+                    {{ retention_counts['7+'] }}, 
+                    {{ retention_counts['14+'] }}
+                ],
+                backgroundColor: [
+                    'rgba(78, 115, 223, 0.8)',
+                    'rgba(28, 200, 138, 0.8)',
+                    'rgba(54, 185, 204, 0.8)',
+                    'rgba(246, 194, 62, 0.8)',
+                    'rgba(231, 74, 59, 0.8)',
+                    'rgba(133, 135, 150, 0.8)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Users'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

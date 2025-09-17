@@ -1,0 +1,645 @@
+/* ==================== ANIMATION FOUNDATIONS ==================== */
+
+/* CSS Variables for Animation System */
+:root {
+    --primary-color: #4169e1;
+    --secondary-color: #d4a859;
+    --background-dark: #121212;
+    --background-light: #FAF9F6;
+    --background-beige: #eae6dc;
+    --text-dark: #333;
+    --text-light: #ffffff;
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    
+    /* Animation durations */
+    --duration-fast: 0.2s;
+    --duration-normal: 0.3s;
+    --duration-medium: 0.5s;
+    --duration-slow: 0.8s;
+    --duration-very-slow: 1.2s;
+    
+    /* Easing functions */
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --ease-sharp: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Global animation utility classes */
+.fade-in {
+    animation: fadeIn var(--duration-normal) var(--ease-smooth) forwards;
+}
+
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity var(--duration-medium) var(--ease-smooth), transform var(--duration-medium) var(--ease-smooth);
+}
+
+.fade-in-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.slide-in-left {
+    animation: slideInLeft var(--duration-medium) var(--ease-bounce);
+}
+
+.slide-in-right {
+    animation: slideInRight var(--duration-medium) var(--ease-bounce);
+}
+
+.scale-in {
+    animation: scaleIn var(--duration-normal) var(--ease-bounce);
+}
+
+.bounce-in {
+    animation: bounceIn var(--duration-slow) var(--ease-elastic);
+}
+
+.shake {
+    animation: shake var(--duration-medium) var(--ease-smooth);
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+.rotate {
+    animation: rotate 2s linear infinite;
+}
+
+/* ==================== CORE KEYFRAMES ==================== */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Text animation keyframes */
+@keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes blink {
+    0%, 50% { border-color: transparent; }
+    51%, 100% { border-color: var(--primary-color); }
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes flipInX {
+    from {
+        opacity: 0;
+        transform: perspective(400px) rotateX(-90deg);
+    }
+    to {
+        opacity: 1;
+        transform: perspective(400px) rotateX(0deg);
+    }
+}
+
+@keyframes flipInY {
+    from {
+        opacity: 0;
+        transform: perspective(400px) rotateY(-90deg);
+    }
+    to {
+        opacity: 1;
+        transform: perspective(400px) rotateY(0deg);
+    }
+}
+
+/* ==================== INTERACTIVE COMPONENTS ==================== */
+
+/* Button Animations */
+.btn-animated {
+    position: relative;
+    overflow: hidden;
+    transition: all var(--duration-normal) var(--ease-smooth);
+    transform: translateY(0);
+}
+
+.btn-animated:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.btn-animated:active {
+    transform: translateY(0);
+    transition-duration: var(--duration-fast);
+}
+
+.btn-animated::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left var(--duration-medium) var(--ease-smooth);
+}
+
+.btn-animated:hover::before {
+    left: 100%;
+}
+
+/* Card Animations */
+.card-animated {
+    transition: all var(--duration-normal) var(--ease-smooth);
+    transform: translateY(0);
+}
+
+.card-animated:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+}
+
+.card-animated .card-body {
+    transition: padding var(--duration-normal) var(--ease-smooth);
+}
+
+.card-animated:hover .card-body {
+    padding: 1.5rem;
+}
+
+/* Text Animations */
+.text-animated {
+    display: inline-block;
+    transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.text-animated:hover {
+    color: var(--primary-color);
+    transform: scale(1.05);
+}
+
+.typewriter {
+    overflow: hidden;
+    border-right: 2px solid var(--primary-color);
+    white-space: nowrap;
+    margin: 0 auto;
+    animation: typewriter 3s steps(40) 1s 1 normal both, blink 1s infinite;
+}
+
+.text-glow {
+    text-shadow: 0 0 10px rgba(65, 105, 225, 0.5);
+    transition: text-shadow var(--duration-normal) var(--ease-smooth);
+}
+
+.text-glow:hover {
+    text-shadow: 0 0 20px rgba(65, 105, 225, 0.8);
+}
+
+/* ==================== QUESTION INTERFACE ANIMATIONS ==================== */
+
+/* Question reveal animation */
+.question-container {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideInUp var(--duration-medium) var(--ease-smooth) forwards;
+}
+
+.question-container.revealed {
+    animation-delay: 0.2s;
+}
+
+/* Choice animations */
+.choice-option {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.choice-option.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.choice-option:nth-child(1) { animation-delay: 0.1s; }
+.choice-option:nth-child(2) { animation-delay: 0.2s; }
+.choice-option:nth-child(3) { animation-delay: 0.3s; }
+.choice-option:nth-child(4) { animation-delay: 0.4s; }
+
+.choice-option:hover {
+    background-color: rgba(65, 105, 225, 0.1);
+    transform: translateX(5px);
+    border-left: 4px solid var(--primary-color);
+}
+
+.choice-option.selected {
+    background-color: rgba(65, 105, 225, 0.2);
+    border-left: 4px solid var(--primary-color);
+    animation: selectedChoice var(--duration-normal) var(--ease-bounce);
+}
+
+.choice-option.correct {
+    background-color: rgba(40, 167, 69, 0.2);
+    border-left: 4px solid var(--success-color);
+    animation: correctAnswer var(--duration-medium) var(--ease-bounce);
+}
+
+.choice-option.incorrect {
+    background-color: rgba(220, 53, 69, 0.2);
+    border-left: 4px solid var(--error-color);
+    animation: incorrectAnswer var(--duration-medium) var(--ease-smooth);
+}
+
+@keyframes selectedChoice {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+@keyframes correctAnswer {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.05); }
+    50% { transform: scale(0.98); }
+    75% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+@keyframes incorrectAnswer {
+    0%, 20%, 40%, 60%, 80%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+}
+
+/* Progress indicators */
+.progress-animated {
+    position: relative;
+    background-color: rgba(65, 105, 225, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-animated::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.progress-bar-animated {
+    transition: width var(--duration-slow) var(--ease-smooth);
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ==================== FEEDBACK AND NOTIFICATIONS ==================== */
+
+/* Success animations */
+.success-message {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    animation: slideInDown var(--duration-medium) var(--ease-bounce);
+}
+
+.error-message {
+    background: linear-gradient(135deg, #dc3545, #e83e8c);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    animation: shake var(--duration-medium) var(--ease-smooth);
+}
+
+.info-message {
+    background: linear-gradient(135deg, #17a2b8, #6f42c1);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    animation: fadeIn var(--duration-normal) var(--ease-smooth);
+}
+
+/* Achievement popup */
+.achievement-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    transform: translateX(400px);
+    animation: achievementSlideIn var(--duration-medium) var(--ease-bounce) forwards;
+}
+
+@keyframes achievementSlideIn {
+    from { transform: translateX(400px); }
+    to { transform: translateX(0); }
+}
+
+/* Confetti animation */
+.confetti {
+    position: fixed;
+    top: -10px;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--primary-color);
+    animation: confettiFall 3s linear infinite;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* ==================== LOADING STATES ==================== */
+
+/* Spinner animations */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(65, 105, 225, 0.1);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-dots {
+    display: inline-block;
+}
+
+.loading-dots::after {
+    content: '';
+    animation: loadingDots 1.5s infinite;
+}
+
+@keyframes loadingDots {
+    0%, 20% { content: ''; }
+    40% { content: '.'; }
+    60% { content: '..'; }
+    80%, 100% { content: '...'; }
+}
+
+/* Skeleton loading */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s infinite;
+}
+
+@keyframes skeletonLoading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ==================== NAVIGATION ANIMATIONS ==================== */
+
+/* Header animations */
+.header-scrolled {
+    background-color: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile menu animations */
+.mobile-menu-enter {
+    animation: mobileMenuSlideIn var(--duration-normal) var(--ease-smooth);
+}
+
+.mobile-menu-exit {
+    animation: mobileMenuSlideOut var(--duration-normal) var(--ease-smooth);
+}
+
+@keyframes mobileMenuSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes mobileMenuSlideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+/* ==================== DASHBOARD ANIMATIONS ==================== */
+
+/* Exam card animations */
+.exam-card {
+    transition: all var(--duration-normal) var(--ease-smooth);
+    transform: translateY(0);
+    opacity: 0;
+    animation: cardFadeInUp var(--duration-medium) var(--ease-smooth) forwards;
+}
+
+.exam-card:nth-child(1) { animation-delay: 0.1s; }
+.exam-card:nth-child(2) { animation-delay: 0.2s; }
+.exam-card:nth-child(3) { animation-delay: 0.3s; }
+.exam-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes cardFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.exam-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Statistics animations */
+.stat-counter {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.stat-counter.animated {
+    animation: countUp 2s var(--ease-smooth);
+}
+
+@keyframes countUp {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ==================== RESPONSIVE ANIMATIONS ==================== */
+
+/* Disable animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    .btn-animated:hover {
+        transform: none;
+    }
+    
+    .card-animated:hover {
+        transform: none;
+    }
+    
+    .exam-card:hover {
+        transform: none;
+    }
+    
+    /* Simplify animations on mobile */
+    .fade-in-up,
+    .slide-in-left,
+    .slide-in-right,
+    .bounce-in {
+        animation: mobileSimpleFadeIn var(--duration-fast) var(--ease-smooth);
+    }
+    
+    @keyframes mobileSimpleFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+}

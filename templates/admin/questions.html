@@ -1,0 +1,289 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Question Management | PrepForge Pro Admin{% endblock %}
+
+{% block page_title %}Question Management{% endblock %}
+
+{% block header_actions %}
+<form class="d-flex" action="{{ url_for('admin.question_management') }}" method="get">
+    <label for="exam_type_filter" class="visually-hidden">Filter by exam type</label>
+    <select class="form-select me-2" name="exam_type" id="exam_type_filter" aria-label="Filter questions by exam type">
+        <option value="">All Exam Types</option>
+        {% for exam in available_exams %}
+        <option value="{{ exam }}" {% if exam_type == exam %}selected{% endif %}>{{ exam }}</option>
+        {% endfor %}
+    </select>
+    <label for="difficulty_filter" class="visually-hidden">Filter by difficulty</label>
+    <select class="form-select me-2" name="difficulty" id="difficulty_filter" aria-label="Filter questions by difficulty level">
+        <option value="">All Difficulties</option>
+        {% for diff in available_difficulties %}
+        <option value="{{ diff }}" {% if difficulty == diff %}selected{% endif %}>{{ diff }}</option>
+        {% endfor %}
+    </select>
+    <button class="btn btn-outline-primary" type="submit" aria-label="Apply filters to question list">
+        <i class="fas fa-filter" aria-hidden="true"></i> Filter
+    </button>
+</form>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Questions Overview -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Questions Overview</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h2>{{ total_questions }}</h2>
+                    <p class="text-muted">Total Questions</p>
+                </div>
+                <div class="text-center mb-4">
+                    <h2>{{ cached_questions }}</h2>
+                    <p class="text-muted">Cached Questions</p>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ cache_ratio }}%"
+                            aria-valuenow="{{ cache_ratio }}" aria-valuemin="0" aria-valuemax="100">{{ cache_ratio }}%</div>
+                    </div>
+                    <div class="small text-muted mt-2">Cache Ratio</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Exam Type Distribution -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Questions by Exam Type</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Exam Type</th>
+                                <th>Count</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in exam_distribution %}
+                            <tr>
+                                <td>{{ exam.exam_type }}</td>
+                                <td>{{ exam.count }}</td>
+                                <td>{{ (exam.count / total_questions * 100)|round(1) }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Difficulty Distribution -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Questions by Difficulty</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Difficulty</th>
+                                <th>Count</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for diff in difficulty_distribution %}
+                            <tr>
+                                <td>{{ diff.difficulty }}</td>
+                                <td>{{ diff.count }}</td>
+                                <td>{{ (diff.count / total_questions * 100)|round(1) }}%</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4">
+                    <canvas id="difficultyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Question List -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Question List</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="questions-table" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Exam Type</th>
+                        <th>Subject</th>
+                        <th>Difficulty</th>
+                        <th>Question</th>
+                        <th>Cached</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in questions.items %}
+                    <tr>
+                        <td>{{ question.id }}</td>
+                        <td>{{ question.exam_type }}</td>
+                        <td>{{ question.subject }}</td>
+                        <td>
+                            {% if question.difficulty == 'easy' %}
+                            <span class="badge bg-success">Easy</span>
+                            {% elif question.difficulty == 'medium' %}
+                            <span class="badge bg-warning text-dark">Medium</span>
+                            {% else %}
+                            <span class="badge bg-danger">Hard</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ question.question_text[:50] }}{% if question.question_text|length > 50 %}...{% endif %}</td>
+                        <td class="text-center">
+                            {% if question.cached_version|length > 0 %}
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            {% else %}
+                            <i class="bi bi-x-circle-fill text-danger"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin.question_detail', question_id=question.id) }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if questions.pages > 1 %}
+        <div class="d-flex justify-content-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if questions.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.question_management', page=questions.prev_num, exam_type=exam_type, difficulty=difficulty) }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in questions.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            {% if page_num == questions.page %}
+                            <li class="page-item active">
+                                <a class="page-link" href="{{ url_for('admin.question_management', page=page_num, exam_type=exam_type, difficulty=difficulty) }}">{{ page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.question_management', page=page_num, exam_type=exam_type, difficulty=difficulty) }}">{{ page_num }}</a>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">...</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if questions.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.question_management', page=questions.next_num, exam_type=exam_type, difficulty=difficulty) }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Difficulty Distribution Chart - Only initialize if Chart.js is loaded and canvas exists
+    const difficultyChartCanvas = document.getElementById('difficultyChart');
+    
+    if (difficultyChartCanvas && typeof Chart !== 'undefined') {
+        try {
+            const diffCtx = difficultyChartCanvas.getContext('2d');
+            
+            const difficultyLabels = [
+                {% for diff in difficulty_distribution %}
+                "{{ diff.difficulty|e }}",
+                {% endfor %}
+            ];
+            
+            const difficultyData = [
+                {% for diff in difficulty_distribution %}
+                {{ diff.count|int }},
+                {% endfor %}
+            ];
+    
+    const difficultyColors = [
+        'rgba(28, 200, 138, 0.8)',  // easy - green
+        'rgba(246, 194, 62, 0.8)',  // medium - yellow
+        'rgba(231, 74, 59, 0.8)'    // hard - red
+    ];
+    
+            // Only create chart if we have valid data
+            if (difficultyLabels.length > 0 && difficultyData.length > 0) {
+                new Chart(diffCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: difficultyLabels,
+                        datasets: [{
+                            data: difficultyData,
+                            backgroundColor: difficultyColors,
+                            borderColor: '#ffffff',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Failed to create difficulty chart:', error);
+        }
+    } else {
+        console.warn('Chart.js not loaded or canvas not found');
+    }
+</script>
+{% endblock %}

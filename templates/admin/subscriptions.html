@@ -1,0 +1,256 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Subscription Management | PrepForge Pro Admin{% endblock %}
+
+{% block page_title %}Subscription Management{% endblock %}
+
+{% block header_actions %}
+<div class="btn-group">
+    <a href="{{ url_for('admin.subscription_management', status='all') }}" class="btn btn-sm {% if status == 'all' %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+    <a href="{{ url_for('admin.subscription_management', status='active') }}" class="btn btn-sm {% if status == 'active' %}btn-primary{% else %}btn-outline-primary{% endif %}">Active</a>
+    <a href="{{ url_for('admin.subscription_management', status='inactive') }}" class="btn btn-sm {% if status == 'inactive' %}btn-primary{% else %}btn-outline-primary{% endif %}">Inactive</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Subscription Summary -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Subscription Summary</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-4">
+                        <h2>{{ active_subscriptions }}</h2>
+                        <p class="text-muted">Active Subscriptions</p>
+                    </div>
+                    <div class="col-6 mb-4">
+                        <h2>{{ inactive_subscriptions }}</h2>
+                        <p class="text-muted">Inactive Subscriptions</p>
+                    </div>
+                </div>
+                <div class="text-center mb-4">
+                    <h2>${{ monthly_revenue }}</h2>
+                    <p class="text-muted">Monthly Revenue</p>
+                </div>
+                <div class="progress mt-3">
+                    {% set active_percent = (active_subscriptions / (active_subscriptions + inactive_subscriptions) * 100) if (active_subscriptions + inactive_subscriptions) > 0 else 0 %}
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ active_percent }}%"
+                        aria-valuenow="{{ active_percent }}" aria-valuemin="0" aria-valuemax="100">{{ active_percent|round }}%</div>
+                </div>
+                <p class="small text-muted text-center mt-2">Active Subscription Rate</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Monthly Trends -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Monthly Subscription Trends ({{ '%04d'|format(current_year|int) }})</h6>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px;">
+                    <canvas id="monthlySubsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Subscription List -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Subscription List</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="subscriptions-table" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in subscriptions.items %}
+                    <tr>
+                        <td>{{ sub.id }}</td>
+                        <td>{{ sub.name }}</td>
+                        <td>{{ sub.email }}</td>
+                        <td>
+                            {% if sub.active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ sub.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ sub.updated_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.user_detail', user_id=sub.id) }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-eye"></i> View User
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if subscriptions.pages > 1 %}
+        <div class="d-flex justify-content-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if subscriptions.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.subscription_management', page=subscriptions.prev_num, status=status) }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in subscriptions.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+                        {% if page_num %}
+                            {% if page_num == subscriptions.page %}
+                            <li class="page-item active">
+                                <a class="page-link" href="{{ url_for('admin.subscription_management', page=page_num, status=status) }}">{{ page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin.subscription_management', page=page_num, status=status) }}">{{ page_num }}</a>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">...</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if subscriptions.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin.subscription_management', page=subscriptions.next_num, status=status) }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Monthly Subscription Trends
+    const monthlyCtx = document.getElementById('monthlySubsChart').getContext('2d');
+    
+    const months = [
+        {% for data in monthly_data %}
+            "{{ data.month }}",
+        {% endfor %}
+    ];
+    
+    const activeData = [
+        {% for data in monthly_data %}
+            {{ data.active }},
+        {% endfor %}
+    ];
+    
+    const newData = [
+        {% for data in monthly_data %}
+            {{ data.new }},
+        {% endfor %}
+    ];
+    
+    const revenueData = [
+        {% for data in monthly_data %}
+            {{ data.revenue }},
+        {% endfor %}
+    ];
+    
+    new Chart(monthlyCtx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Active Subscriptions',
+                    data: activeData,
+                    backgroundColor: 'rgba(28, 200, 138, 0.8)',
+                    borderColor: 'rgba(28, 200, 138, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'New Subscriptions',
+                    data: newData,
+                    backgroundColor: 'rgba(54, 185, 204, 0.8)',
+                    borderColor: 'rgba(54, 185, 204, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Revenue ($)',
+                    data: revenueData,
+                    type: 'line',
+                    backgroundColor: 'rgba(246, 194, 62, 0.05)',
+                    borderColor: 'rgba(246, 194, 62, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(246, 194, 62, 1)',
+                    pointBorderColor: '#fff',
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Subscriptions'
+                    }
+                },
+                y1: {
+                    position: 'right',
+                    beginAtZero: true,
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Revenue ($)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

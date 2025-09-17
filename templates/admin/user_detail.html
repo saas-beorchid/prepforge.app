@@ -1,0 +1,185 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}User Details | PrepForge Pro Admin{% endblock %}
+
+{% block page_title %}User Details: {{ user.name }}{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('admin.user_management') }}" class="btn btn-sm btn-primary me-2">
+    <i class="bi bi-arrow-left"></i> Back to Users
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- User Profile Card -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Profile Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <img class="img-profile rounded-circle mb-3" src="https://ui-avatars.com/api/?name={{ user.name|urlencode }}&background=4e73df&color=ffffff&size=128" alt="{{ user.name }}">
+                    <h4>{{ user.name }}</h4>
+                    <div class="text-muted">{{ user.email }}</div>
+                    {% if subscription and subscription.active %}
+                    <span class="badge bg-success mt-2">Premium User</span>
+                    {% else %}
+                    <span class="badge bg-secondary mt-2">Trial User</span>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Joined On</div>
+                    <div>{{ user.created_at.strftime('%B %d, %Y') }}</div>
+                </div>
+                
+                {% if subscription %}
+                <div class="mb-3">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Subscription Status</div>
+                    <div>{% if subscription.active %}Active{% else %}Inactive{% endif %}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Subscription Started</div>
+                    <div>{{ subscription.created_at.strftime('%B %d, %Y') }}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Last Updated</div>
+                    <div>{{ subscription.updated_at.strftime('%B %d, %Y') }}</div>
+                </div>
+                {% endif %}
+                
+                {% if streak %}
+                <div class="mb-3">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Current Streak</div>
+                    <div>{{ streak.current_streak }} days</div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Longest Streak</div>
+                    <div>{{ streak.longest_streak }} days</div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Last Active</div>
+                    <div>{{ streak.last_activity_date.strftime('%B %d, %Y') }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Stats -->
+    <div class="col-md-8 mb-4">
+        <div class="row">
+            <!-- Progress Overview -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Learning Progress</h6>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="mb-1">{{ progress_count }}</h2>
+                        <div class="mb-3">Questions Answered</div>
+                        
+                        <h2 class="mb-1">{{ accuracy }}%</h2>
+                        <div class="mb-3">Overall Accuracy</div>
+                        
+                        <h5 class="mt-4 mb-3">Exam Type Distribution</h5>
+                        <div class="mb-4">
+                            {% for exam in exam_distribution %}
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>{{ exam.exam_type }}</span>
+                                    <span class="text-muted">{{ exam.count }} questions</span>
+                                </div>
+                                <div class="progress">
+                                    {% set percent = (exam.count / progress_count * 100) if progress_count > 0 else 0 %}
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: {{ percent }}%" 
+                                        aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Badges -->
+            <div class="col-md-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Badges Earned</h6>
+                    </div>
+                    <div class="card-body">
+                        {% if badges %}
+                            <div class="row">
+                                {% for badge, achieved_at in badges %}
+                                <div class="col-6 mb-3">
+                                    <div class="p-3 text-center">
+                                        <i class="bi bi-{{ badge.icon }} fs-1 text-{{ badge.color }}"></i>
+                                        <h6 class="mt-2 mb-0">{{ badge.name }}</h6>
+                                        <div class="small text-muted">{{ achieved_at.strftime('%b %d, %Y') }}</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-award fs-1 text-muted"></i>
+                                <p class="mt-2">No badges earned yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Activity</h6>
+            </div>
+            <div class="card-body">
+                {% if recent_activity %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Exam Type</th>
+                                    <th>Question ID</th>
+                                    <th>Result</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for activity in recent_activity %}
+                                <tr>
+                                    <td>{{ activity.exam_type }}</td>
+                                    <td>{{ activity.question_id }}</td>
+                                    <td>
+                                        {% if activity.answered_correctly %}
+                                        <span class="badge bg-success">Correct</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Incorrect</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ activity.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <p>No recent activity</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

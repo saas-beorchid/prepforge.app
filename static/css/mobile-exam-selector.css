@@ -1,0 +1,350 @@
+/* Modern Mobile-First Exam Selection CSS */
+
+/* Enhanced Exam Selection Form */
+.exam-selection-section {
+    margin: 2rem 0;
+}
+
+.exam-selection-section h2 {
+    color: #121212;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.practice-form {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(65, 105, 225, 0.1);
+}
+
+/* Custom Select Dropdown */
+.exam-select-wrapper {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.exam-select-wrapper select {
+    width: 100%;
+    padding: 1rem 3rem 1rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #374151;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Custom arrow - only show one */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+}
+
+.exam-select-wrapper select:focus {
+    outline: none;
+    border-color: #4169e1;
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%234169e1' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+}
+
+.exam-select-wrapper select:hover {
+    border-color: #94a3b8;
+}
+
+/* Option styling */
+.exam-select-wrapper select option {
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: #374151;
+    background: white;
+}
+
+.exam-select-wrapper select option:first-child {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* Mobile-specific dropdown positioning */
+@media (max-width: 768px) {
+    .exam-select-wrapper {
+        position: relative;
+        margin-bottom: 1.5rem;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    .exam-select-wrapper select {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0.875rem 2.5rem 0.875rem 0.875rem !important;
+        font-size: 0.95rem !important;
+        line-height: 1.4 !important;
+        border-radius: 10px !important;
+        /* Ensure proper mobile dropdown behavior */
+        position: relative !important;
+        z-index: 10 !important;
+        box-sizing: border-box !important;
+        /* Fix dropdown positioning on mobile */
+        direction: ltr !important;
+        text-align: left !important;
+        /* Enhanced mobile dropdown behavior - use native to prevent double arrows */
+        -webkit-appearance: menulist !important;
+        -moz-appearance: menulist !important;
+        appearance: menulist !important;
+        /* Prevent horizontal overflow */
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+    }
+    
+    /* Remove custom arrow on mobile to prevent double arrows */
+    .exam-select-wrapper select {
+        background-image: none !important;
+        background-size: auto !important;
+        background-position: initial !important;
+    }
+    
+    /* Mobile option styling for better readability */
+    .exam-select-wrapper select option {
+        padding: 0.75rem 0.5rem !important;
+        font-size: 0.9rem !important;
+        line-height: 1.3 !important;
+        color: #374151 !important;
+        background: white !important;
+        /* Ensure text fits properly on mobile screens */
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        text-overflow: ellipsis !important;
+        overflow: hidden !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Prevent horizontal scrolling on mobile */
+    .practice-form {
+        overflow-x: hidden !important;
+        padding: 1.25rem !important;
+        margin: 0 0.75rem !important;
+        width: calc(100% - 1.5rem) !important;
+        max-width: calc(100% - 1.5rem) !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Ensure container doesn't allow overflow */
+    .exam-selection-section {
+        overflow-x: hidden !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 0 !important;
+        margin: 1.5rem 0 !important;
+    }
+    
+    /* Ensure consistent appearance across devices */
+    .exam-select-wrapper select {
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+        /* Single custom arrow only */
+    }
+}
+
+.exam-select-wrapper select option:hover,
+.exam-select-wrapper select option:focus {
+    background: #f1f5f9;
+    color: #4169e1;
+}
+
+/* Start Practice Button */
+.start-practice-btn {
+    width: 100%;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #4169e1, #6b46c1);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    box-shadow: 0 4px 12px rgba(65, 105, 225, 0.3);
+}
+
+.start-practice-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(65, 105, 225, 0.4);
+}
+
+.start-practice-btn:active {
+    transform: translateY(0);
+}
+
+.start-practice-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.start-practice-btn i {
+    font-size: 1.2rem;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .exam-selection-section {
+        margin: 1.5rem -0.75rem;
+    }
+    
+    .practice-form {
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin: 0 0.75rem;
+    }
+    
+    .exam-select-wrapper select {
+        padding: 0.875rem 2.5rem 0.875rem 0.875rem;
+        font-size: 0.95rem;
+        border-radius: 10px;
+    }
+    
+    .start-practice-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+    
+    .exam-selection-section h2 {
+        font-size: 1.25rem;
+        margin-bottom: 0.875rem;
+        padding: 0 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .practice-form {
+        padding: 1rem !important;
+        margin: 0 0.5rem !important;
+        width: calc(100% - 1rem) !important;
+        max-width: calc(100% - 1rem) !important;
+    }
+    
+    .exam-select-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .exam-select-wrapper select {
+        padding: 0.75rem 2.25rem 0.75rem 0.75rem !important;
+        font-size: 0.9rem !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        /* Keep custom appearance to prevent double arrows */
+        -webkit-appearance: none !important;
+        -moz-appearance: none !important;
+        appearance: none !important;
+    }
+    
+    /* Smaller mobile options */
+    .exam-select-wrapper select option {
+        padding: 0.5rem !important;
+        font-size: 0.85rem !important;
+        line-height: 1.2 !important;
+    }
+    
+    .start-practice-btn {
+        padding: 0.75rem 1.25rem !important;
+        font-size: 0.95rem !important;
+        width: 100% !important;
+    }
+}
+
+/* Loading State */
+.start-practice-btn.loading {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.start-practice-btn.loading .btn-text {
+    display: none;
+}
+
+.start-practice-btn.loading::after {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Enhanced Visual Feedback */
+.exam-select-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #4169e1, #6b46c1);
+    border-radius: 14px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.exam-select-wrapper:focus-within::before {
+    opacity: 0.1;
+}
+
+/* Accessibility Improvements */
+.exam-select-wrapper select:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .exam-select-wrapper select,
+    .start-practice-btn {
+        transition: none;
+    }
+    
+    .start-practice-btn:hover {
+        transform: none;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .exam-select-wrapper select {
+        border-width: 3px;
+        border-color: #000;
+    }
+    
+    .start-practice-btn {
+        border: 2px solid #000;
+    }
+}

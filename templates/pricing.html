@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}PrepForge Premium{% endblock %}
+
+{% block extra_head %}
+<!-- Stripe JS SDK -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+  // Global embedded checkout functions
+  function redirectToCheckout(priceId) {
+    console.log("🚀 Initiating checkout for:", priceId);
+    window.location.href = `/create-checkout-session?price_id=${priceId}`;
+  }
+
+  // Make functions available globally for embedded checkout
+  window.redirectToCheckout = redirectToCheckout;
+  console.log("✅ Global embedded checkout functions loaded");
+</script>
+
+<style>
+  /* Pricing Page Unified Design */
+  .pricing-page {
+    background: linear-gradient(135deg, var(--off-white), var(--beige));
+    min-height: 100vh;
+    padding: var(--space-2xl) 0;
+  }
+
+  .pricing-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+  }
+
+  .pricing-title {
+    font-size: var(--font-size-4xl);
+    font-weight: 700;
+    color: var(--dark-color);
+    text-align: center;
+    margin: var(--space-2xl) 0;
+    background: linear-gradient(
+      135deg,
+      var(--primary-color),
+      var(--primary-hover)
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .pricing-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: var(--space-xl);
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--space-xl) 0;
+  }
+
+  .pricing-card {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-2xl);
+    position: relative;
+    transition: all var(--transition-base);
+    border: 2px solid transparent;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pricing-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .pricing-card.featured {
+    border-color: var(--primary-color);
+    transform: scale(1.05);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: white;
+  }
+
+  .pricing-card.featured::before {
+    content: "Most Popular";
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(
+      135deg,
+      var(--primary-color),
+      var(--primary-hover)
+    );
+    color: white;
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .card-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pricing-card h3 {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--dark-color);
+    text-align: center;
+    margin-bottom: var(--space-md);
+  }
+  
+  .pricing-card.featured h3 {
+    color: white;
+  }
+
+  .price {
+    text-align: center;
+    margin-bottom: var(--space-lg);
+    font-size: var(--font-size-4xl);
+    font-weight: 700;
+    color: var(--dark-color);
+    line-height: 1;
+  }
+  
+  .pricing-card.featured .price {
+    color: white;
+  }
+
+  .price .period {
+    font-size: var(--font-size-lg);
+    color: var(--gray-500);
+    font-weight: 400;
+  }
+  
+  .pricing-card.featured .price .period {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .tagline {
+    color: var(--gray-600);
+    text-align: center;
+    margin-bottom: var(--space-xl);
+    font-size: var(--font-size-base);
+    font-style: italic;
+  }
+  
+  .pricing-card.featured .tagline {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .features {
+    list-style: none !important;
+    list-style-type: none !important;
+    padding: 0 !important;
+    margin: 0 0 var(--space-xl) 0 !important;
+    flex-grow: 1;
+  }
+
+  .features li {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--space-md);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-size: var(--font-size-base);
+    color: var(--gray-700);
+    list-style: none !important;
+    list-style-type: none !important;
+  }
+  
+  .pricing-card.featured .features li {
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .features li:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  .features li i {
+    color: var(--success-green);
+    margin-right: var(--space-md);
+    font-size: var(--font-size-lg);
+    min-width: 20px;
+  }
+  
+  .pricing-card.featured .features li i {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .features li::before,
+  .features li::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  .select-button {
+    width: 100%;
+    background: linear-gradient(
+      135deg,
+      var(--primary-color),
+      var(--primary-hover)
+    );
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg) var(--space-xl);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: var(--space-lg) 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    text-decoration: none;
+  }
+
+  .select-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    color: white;
+  }
+
+  .pricing-card:not(.featured) .select-button {
+    background: linear-gradient(135deg, var(--gray-200), var(--gray-300));
+    color: var(--gray-700);
+  }
+
+  .pricing-card:not(.featured) .select-button:hover {
+    background: linear-gradient(135deg, var(--gray-300), var(--gray-400));
+    color: var(--gray-800);
+  }
+
+  @media (max-width: 768px) {
+    .pricing-title {
+      font-size: var(--font-size-3xl);
+    }
+
+    .pricing-container {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+      padding: 0 var(--space-md);
+    }
+
+    .pricing-card {
+      padding: var(--space-xl);
+      min-height: auto;
+    }
+
+    .pricing-card.featured {
+      transform: none;
+    }
+
+    .price {
+      font-size: var(--font-size-3xl);
+    }
+
+    .features li {
+      font-size: var(--font-size-sm);
+    }
+
+    .select-button {
+      padding: var(--space-md) var(--space-lg);
+      font-size: var(--font-size-base);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .pricing-section {
+      padding: 0 var(--space-sm);
+    }
+
+    .pricing-card {
+      padding: var(--space-lg);
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pricing-page">
+  <div class="pricing-section">
+    <h1 class="pricing-title">Choose Your PrepForge Plan</h1>
+    <div class="pricing-container">
+      <!-- Free Plan -->
+      <div class="pricing-card">
+        <div class="card-content">
+          <h3>Free Plan</h3>
+          <div class="price">$0<span class="period">/ month</span></div>
+          <a href="{{ url_for('index') }}#get-started" class="select-button"
+            >Get Started</a
+          >
+          <p class="tagline">Preview.</p>
+          <ul class="features">
+            <li><i class="fas fa-check"></i>Free trial up to 20 questions</li>
+            <li>
+              <i class="fas fa-check"></i>Unlimited multiple-choice question
+              generation
+            </li>
+            <li><i class="fas fa-check"></i>Updating performance review</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Pro Plan -->
+      <div class="pricing-card featured">
+        <div class="card-content">
+          <h3>Pro Plan</h3>
+          <div class="price">$15<span class="period">/ month</span></div>
+          <form method="POST" action="{{ url_for('start_trial') }}" style="margin: 0;">
+            <button type="submit" class="select-button" id="pricing-upgrade-btn">
+              Start free trial
+            </button>
+          </form>
+          <p class="tagline">
+            7-day free trial, then $15/month. Cancel anytime.
+          </p>
+          <ul class="features">
+            <li>
+              <i class="fas fa-check"></i>Unlimited multiple-choice question
+              generation
+            </li>
+            <li><i class="fas fa-check"></i>Updating performance review</li>
+            <li><i class="fas fa-check"></i>Access to latest features</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,281 @@
+/* Mobile Native Navigation Design */
+
+/* Enhanced Header Layout */
+@media (max-width: 768px) {
+    .header-content {
+        position: relative !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        min-height: 4rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+    
+    .logo {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        height: 3rem !important;
+    }
+    
+    .logo a {
+        flex: 0 0 auto !important;
+        height: 3rem !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    
+    /* Ensure logo image is properly centered */
+    .logo a img {
+        height: 3rem !important;
+        width: auto !important;
+        object-fit: contain !important;
+        display: block !important;
+    }
+    
+    /* Enhanced Hamburger Menu Button - hide when not needed */
+    .mobile-menu-toggle {
+        position: relative !important;
+        z-index: 10001 !important;
+        width: 48px !important;
+        height: 48px !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 12px !important;
+        backdrop-filter: blur(10px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 4px !important;
+        cursor: pointer !important;
+        flex: 0 0 auto !important;
+        align-self: center !important;
+        margin: 0 !important;
+    }
+    
+    .mobile-menu-toggle span {
+        width: 20px !important;
+        height: 2px !important;
+        background: #374151 !important;
+        border-radius: 1px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    .mobile-menu-toggle.active {
+        background: rgba(255, 255, 255, 0.95) !important;
+    }
+    
+    .mobile-menu-toggle.active span:nth-child(1) {
+        transform: translateY(6px) rotate(45deg) !important;
+    }
+    
+    .mobile-menu-toggle.active span:nth-child(2) {
+        opacity: 0 !important;
+        transform: scale(0) !important;
+    }
+    
+    .mobile-menu-toggle.active span:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg) !important;
+    }
+}
+
+/* Mobile Native Right-Side Slide-Out Menu (65% width) */
+@media (max-width: 768px) {
+    .main-nav {
+        position: fixed !important;
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        left: auto !important;
+        width: 65% !important;
+        max-width: 320px !important;
+        height: 100vh !important;
+        background: #ffffff !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        align-items: stretch !important;
+        transform: translateX(100%) !important;
+        transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.3s, opacity 0.3s !important;
+        z-index: 10000 !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-top: 4rem !important;
+        padding-bottom: 2rem !important;
+        max-height: 100vh !important;
+        box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15) !important;
+        border-left: 1px solid #e5e7eb !important;
+    }
+    
+    .main-nav.show {
+        transform: translateX(0) !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Force positioning for better control */
+    .main-nav.show,
+    .main-nav:not(.show) {
+        right: 0 !important;
+        left: auto !important;
+    }
+    
+    /* Mobile Menu Items with Icons */
+    .main-nav a {
+        color: #374151 !important;
+        font-size: 1.1rem !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        padding: 1.25rem 2rem !important;
+        margin: 0 !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        transition: all 0.2s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 1rem !important;
+        position: relative !important;
+        min-height: 64px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .main-nav a:hover {
+        background: #f8fafc !important;
+        color: #4169e1 !important;
+        padding-left: 2.5rem !important;
+    }
+    
+    .main-nav a:last-child {
+        border-bottom: none !important;
+    }
+    
+    /* Add right arrow indicators */
+    .main-nav a:after {
+        content: '›' !important;
+        position: absolute !important;
+        right: 2rem !important;
+        color: #9ca3af !important;
+        font-size: 1.2rem !important;
+        opacity: 0 !important;
+        transform: translateX(-10px) !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .main-nav a:hover:after {
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+        color: #4169e1 !important;
+    }
+    
+    /* Home icon */
+    .main-nav a[href*="dashboard"]:before,
+    .main-nav a[href="/dashboard"]:before,
+    .main-nav a[href="/"]:before {
+        content: '🏠' !important;
+        font-size: 1.2rem !important;
+    }
+    
+    /* About icon */
+    .main-nav a[href*="about"]:before {
+        content: 'ℹ️' !important;
+        font-size: 1.2rem !important;
+    }
+    
+    /* Practice icon */
+    .main-nav a[href*="practice"]:before {
+        content: '📚' !important;
+        font-size: 1.2rem !important;
+    }
+    
+    /* Pricing icon */
+    .main-nav a[href*="pricing"]:before {
+        content: '💰' !important;
+        font-size: 1.2rem !important;
+    }
+    
+    /* Badges icon */
+    .main-nav a[href*="badges"]:before {
+        content: '🏆' !important;
+        font-size: 1.2rem !important;
+    }
+    
+    /* Profile icon */
+    .main-nav a[href*="profile"]:before {
+        content: '👤' !important;
+        font-size: 1.2rem !important;
+    }
+    
+    /* Logout icon */
+    .main-nav a[href*="logout"]:before {
+        content: '🚪' !important;
+        font-size: 1.2rem !important;
+    }
+}
+
+/* Dark Overlay Behind Menu */
+@media (max-width: 768px) {
+    .main-nav:before {
+        content: '' !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background: rgba(0, 0, 0, 0.4) !important;
+        opacity: 0 !important;
+        transition: opacity 0.3s ease !important;
+        pointer-events: none !important;
+        z-index: -1 !important;
+    }
+    
+    .main-nav.show:before {
+        opacity: 1 !important;
+        pointer-events: all !important;
+    }
+    
+    .main-nav:not(.show) {
+        pointer-events: none !important;
+    }
+    
+    .main-nav.show {
+        pointer-events: all !important;
+    }
+}
+
+/* Smooth scrolling for mobile menu */
+@media (max-width: 768px) {
+    .main-nav {
+        scroll-behavior: smooth !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+}
+
+/* Responsive Menu Sizing */
+@media (max-width: 480px) {
+    .main-nav {
+        width: 70% !important;
+        max-width: 280px !important;
+    }
+}
+
+@media (max-width: 360px) {
+    .main-nav {
+        width: 75% !important;
+        max-width: 260px !important;
+    }
+}
+
+/* Accessibility improvements */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+    .main-nav,
+    .mobile-menu-toggle span,
+    .main-nav a {
+        transition: none !important;
+    }
+}

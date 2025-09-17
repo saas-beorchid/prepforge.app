@@ -1,0 +1,262 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}System Status | PrepForge Pro Admin{% endblock %}
+
+{% block page_title %}System Status & Performance{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Cache Status -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Cache Status</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h1 class="display-4">{{ cache_ratio }}%</h1>
+                    <p class="lead">Cache Coverage</p>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ cache_ratio }}%"
+                            aria-valuenow="{{ cache_ratio }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="small text-muted mt-2">{{ cache_size }} of {{ total_questions }} questions cached</div>
+                </div>
+                
+                <h5 class="text-center mt-4">Cache by Exam Type</h5>
+                <div class="table-responsive mt-3">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Exam Type</th>
+                                <th>Questions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in cache_by_exam %}
+                            <tr>
+                                <td>{{ exam.exam_type }}</td>
+                                <td>{{ exam.count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- API Usage -->
+    <div class="col-md-8 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">AI API Usage Trends</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h2>{{ api_calls }}</h2>
+                    <p class="text-muted">Total AI Explanations Generated</p>
+                </div>
+                <div style="height: 250px;">
+                    <canvas id="apiUsageChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Server Info -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Server Information</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-weight-bold">Platform</div>
+                            <div class="text-muted">Operating System</div>
+                        </div>
+                        <span>{{ server_info.platform }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-weight-bold">Python Version</div>
+                            <div class="text-muted">Runtime</div>
+                        </div>
+                        <span>{{ server_info.python_version }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-weight-bold">Flask Version</div>
+                            <div class="text-muted">Web Framework</div>
+                        </div>
+                        <span>{{ server_info.flask_version }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-weight-bold">Database Size</div>
+                            <div class="text-muted">PostgreSQL</div>
+                        </div>
+                        <span>{{ server_info.database_size }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-weight-bold">Server Uptime</div>
+                            <div class="text-muted">Time Since Last Restart</div>
+                        </div>
+                        <span>{{ server_info.uptime }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Errors -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">System Health</h6>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-6 border-right">
+                        <div class="text-center">
+                            <h1><i class="bi bi-cpu text-success"></i></h1>
+                            <h5>Database Status</h5>
+                            <div class="badge bg-success">Connected</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h1><i class="bi bi-cloud-check text-success"></i></h1>
+                            <h5>API Status</h5>
+                            <div class="badge bg-success">Operational</div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if recent_errors %}
+                <h5>Recent Errors</h5>
+                <div class="list-group mt-3">
+                    {% for error in recent_errors %}
+                    <div class="list-group-item list-group-item-action flex-column align-items-start">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">{{ error.title }}</h6>
+                            <small>{{ error.time }}</small>
+                        </div>
+                        <p class="mb-1">{{ error.message }}</p>
+                        <small>{{ error.location }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-success mt-4">
+                    <i class="bi bi-check-circle me-2"></i> No errors detected in the system.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cache Distribution -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Cache Distribution by Exam Type</h6>
+    </div>
+    <div class="card-body">
+        <div style="height: 300px;">
+            <canvas id="cacheDistributionChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // API Usage Chart
+    const apiCtx = document.getElementById('apiUsageChart').getContext('2d');
+    new Chart(apiCtx, {
+        type: 'line',
+        data: {
+            labels: {{ api_dates|safe }},
+            datasets: [{
+                label: 'AI Explanations Generated',
+                data: {{ api_counts|safe }},
+                backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                borderColor: 'rgba(78, 115, 223, 1)',
+                pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                pointBorderColor: '#fff',
+                tension: 0.1,
+                borderWidth: 2,
+                fill: true
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Explanations'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+
+    // Cache Distribution Chart
+    const cacheCtx = document.getElementById('cacheDistributionChart').getContext('2d');
+    new Chart(cacheCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ exam_types|safe }},
+            datasets: [{
+                label: 'Cached Questions',
+                data: {{ exam_counts|safe }},
+                backgroundColor: [
+                    'rgba(78, 115, 223, 0.8)',
+                    'rgba(28, 200, 138, 0.8)',
+                    'rgba(54, 185, 204, 0.8)',
+                    'rgba(246, 194, 62, 0.8)',
+                    'rgba(231, 74, 59, 0.8)',
+                    'rgba(133, 135, 150, 0.8)',
+                    'rgba(105, 0, 132, 0.8)',
+                    'rgba(255, 159, 64, 0.8)',
+                    'rgba(0, 128, 128, 0.8)',
+                    'rgba(128, 0, 128, 0.8)',
+                    'rgba(128, 128, 0, 0.8)',
+                    'rgba(0, 128, 0, 0.8)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Questions'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

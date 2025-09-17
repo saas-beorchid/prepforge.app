@@ -1,0 +1,1763 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Profile | PrepForge Pro{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing-page.css') }}">
+<style>
+    /* Profile Page Custom Styles with Enhanced UI based on landing page design */
+    :root {
+        --primary-color: #6200ee;
+        --secondary-color: #03dac6;
+        --primary-gradient: linear-gradient(135deg, #6200ee, #03dac6);
+        --accent-color: #ffc107;
+        --text-primary: #212529;
+        --text-secondary: #6c757d;
+        --text-muted: #86868b;
+        --bg-light: #f8f9fa;
+        --bg-card: #ffffff;
+        --border-color: #e9ecef;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
+        --border-radius-sm: 8px;
+        --border-radius-md: 12px;
+        --border-radius-lg: 16px;
+        --spacing-xs: 0.5rem;
+        --spacing-sm: 1rem;
+        --spacing-md: 1.5rem;
+        --spacing-lg: 2rem;
+    }
+    
+    .profile-section {
+        padding: 2rem 0; /* Reduced padding to minimize empty space */
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+        box-sizing: border-box;
+    }
+    
+    /* Common card styling with improved visual hierarchy */
+    .profile-card {
+        background-color: var(--bg-card);
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: var(--spacing-md);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+    
+    .profile-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    /* Improved card header styling */
+    .card-header {
+        background-color: var(--bg-light);
+        padding: 1rem var(--spacing-md);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--text-primary);
+    }
+    
+    .card-icon {
+        margin-right: 0.75rem;
+        color: var(--primary-color);
+        font-size: 1.1rem;
+    }
+    
+    .card-body {
+        padding: var(--spacing-md);
+    }
+    
+    /* Profile header with improved visual appeal */
+    .profile-header {
+        background: var(--primary-gradient);
+        border-radius: var(--border-radius-md);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-md);
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .profile-header:before, .profile-header:after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+    }
+    
+    .profile-header:before {
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .profile-header:after {
+        bottom: -70px;
+        left: -70px;
+        width: 250px;
+        height: 250px;
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    /* Profile avatar with subtle shadows */
+    .profile-avatar {
+        width: 100px; /* Slightly smaller for better proportions */
+        height: 100px;
+        border-radius: 50%;
+        background-color: white;
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        margin-bottom: var(--spacing-sm);
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Improved typography for profile details */
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .profile-email {
+        font-size: 1rem;
+        opacity: 0.9;
+        margin-bottom: var(--spacing-sm);
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Enhanced account status display */
+    .account-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        position: relative;
+        z-index: 1;
+        transition: all 0.2s ease;
+    }
+    
+    .account-status i {
+        margin-right: 0.5rem;
+    }
+    
+    .account-status.premium {
+        background-color: var(--accent-color);
+        color: var(--text-primary);
+        box-shadow: 0 3px 8px rgba(255, 193, 7, 0.3);
+    }
+    
+    .account-status.trial {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+    
+    .account-status:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* Improved upgrade button with animation */
+    .upgrade-button {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 0.75rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        background-color: white;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .upgrade-button i {
+        margin-right: 0.5rem;
+        transition: transform 0.2s ease;
+    }
+    
+    .upgrade-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        color: var(--primary-color);
+    }
+    
+    .upgrade-button:hover i {
+        transform: translateY(-2px);
+    }
+    
+    /* Improved stats overview grid */
+    .stats-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    /* Enhanced stat boxes with hover effects */
+    .stat-box {
+        background-color: var(--bg-light);
+        padding: var(--spacing-sm);
+        border-radius: var(--border-radius-sm);
+        text-align: center;
+        transition: all 0.2s ease;
+        border: 1px solid rgba(0,0,0,0.03);
+    }
+    
+    .stat-box:hover {
+        background-color: #ebedf0;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+    
+    /* Enhanced progress table */
+    .progress-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: var(--spacing-md);
+        table-layout: auto;
+    }
+    
+    .progress-table th {
+        background-color: var(--bg-light);
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+    
+    .progress-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+    
+    .progress-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .progress-table tr:hover {
+        background-color: rgba(248, 249, 250, 0.6);
+    }
+    
+    /* Mobile responsive styles for profile page */
+    @media (max-width: 768px) {
+        .profile-section {
+            padding: 1rem 0;
+        }
+        
+        .profile-header {
+            padding: var(--spacing-md);
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+        }
+        
+        .progress-table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .progress-table th, 
+        .progress-table td {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .profile-header {
+            padding: 1rem;
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            font-size: 2rem;
+        }
+        
+        .profile-name {
+            font-size: 1.25rem;
+        }
+        
+        .profile-email {
+            font-size: 0.9rem;
+        }
+        
+        .account-status {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+        
+        .upgrade-button {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+    }
+    
+    .success-rate {
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        display: inline-block;
+    }
+    
+    /* Enhanced form styling */
+    .form-group {
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .form-label {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+    
+    .form-label i {
+        margin-right: 0.5rem;
+        color: var(--primary-color);
+        font-size: 1rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: var(--border-radius-sm);
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(98, 0, 238, 0.1);
+        outline: none;
+    }
+    
+    /* Enhanced buttons */
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-sm);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn i {
+        margin-right: 0.5rem;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        box-shadow: 0 3px 8px rgba(98, 0, 238, 0.2);
+    }
+    
+    .btn-primary:hover {
+        background-color: #5000ca;
+        border-color: #5000ca;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(98, 0, 238, 0.3);
+        color: white;
+    }
+    
+    .submit-button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 8px rgba(98, 0, 238, 0.2);
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .submit-button i {
+        margin-right: 0.5rem;
+    }
+    
+    .submit-button:hover {
+        background-color: #5000ca;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(98, 0, 238, 0.3);
+    }
+    
+    /* Improved badge display */
+    .badge-summary {
+        display: flex;
+        align-items: center;
+        margin-top: var(--spacing-md);
+        background-color: rgba(98, 0, 238, 0.05);
+        border-radius: var(--border-radius-sm);
+        padding: var(--spacing-sm);
+        border: 1px solid rgba(98, 0, 238, 0.1);
+    }
+    
+    .badge-count {
+        background-color: white;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        margin-right: var(--spacing-sm);
+        box-shadow: var(--shadow-sm);
+        border: 2px solid rgba(98, 0, 238, 0.2);
+        flex-shrink: 0;
+    }
+    
+    .badge-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    
+    .badge-info {
+        flex: 1;
+    }
+    
+    .badge-info h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.25rem;
+        color: var(--text-primary);
+    }
+    
+    .badge-info p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .badge-link {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background-color: var(--primary-color);
+        color: white;
+        border-radius: 50px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 8px rgba(98, 0, 238, 0.2);
+    }
+    
+    .badge-link i {
+        margin-right: 0.5rem;
+    }
+    
+    .badge-link:hover {
+        background-color: #5000ca;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(98, 0, 238, 0.3);
+        color: white;
+    }
+    
+    /* Improved flash messages */
+    .flash-message {
+        padding: 1rem;
+        border-radius: var(--border-radius-sm);
+        margin-bottom: var(--spacing-md);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+    
+    .flash-message i {
+        margin-right: 0.75rem;
+        font-size: 1.1rem;
+    }
+    
+    .flash-message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .flash-message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .flash-message.info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+    
+    /* Two-column layouts for better space usage */
+    .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    @media (min-width: 768px) {
+        .settings-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    
+    /* Tooltip for clarifying elements */
+    .tooltip-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .tooltip-wrapper:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+    
+    .tooltip-text {
+        visibility: hidden;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        text-align: center;
+        border-radius: 4px;
+        padding: 0.5rem 0.75rem;
+        position: absolute;
+        z-index: 10;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.8rem;
+        font-weight: 400;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .tooltip-text::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+    }
+
+    /* Section heading styles */
+    .section-heading {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+    }
+
+    .section-heading i {
+        margin-right: 0.5rem;
+        color: var(--primary-color);
+    }
+
+    /* Card with highlight */
+    .highlight-card {
+        background-color: var(--bg-light);
+        border-radius: var(--border-radius-sm);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .highlight-card h6 {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .highlight-card h6 i {
+        margin-right: 0.5rem;
+    }
+
+    /* Progress bar */
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: rgba(0, 0, 0, 0.1);
+        margin: 0.5rem 0;
+    }
+
+    .progress-bar {
+        border-radius: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+
+    /* Enhanced Subscription Card Styling */
+    .subscription-status-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(var(--primary-color-rgb), 0.1);
+    }
+    
+    .subscription-status-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .subscription-status-icon.active {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+    
+    .subscription-status-icon.inactive {
+        background: linear-gradient(135deg, #6c757d, #adb5bd);
+        color: white;
+    }
+    
+    .subscription-status-content {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .subscription-status-title {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.25rem;
+        line-height: 1.3;
+    }
+    
+    .subscription-status-subtitle {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .premium-benefits-section {
+        background: rgba(var(--primary-color-rgb), 0.03);
+        border-radius: var(--border-radius-md);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(var(--primary-color-rgb), 0.1);
+    }
+    
+    .benefits-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        color: var(--text-primary);
+    }
+    
+    .benefits-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .benefit-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    .benefit-item i {
+        margin-top: 0.125rem;
+        flex-shrink: 0;
+    }
+    
+    .subscription-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .subscription-btn-primary,
+    .subscription-btn-danger,
+    .subscription-btn-secondary {
+        width: 100%;
+        padding: 0.75rem 1.25rem;
+        font-weight: 600;
+        border-radius: var(--border-radius-md);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border: none;
+        font-size: 0.95rem;
+        letter-spacing: 0.025em;
+    }
+    
+    .subscription-btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), #5a67d8);
+        color: white;
+        box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+    }
+    
+    .subscription-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(var(--primary-color-rgb), 0.4);
+        color: white;
+    }
+    
+    .subscription-btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+    
+    .subscription-btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+        color: white;
+    }
+    
+    .subscription-btn-secondary {
+        background: transparent;
+        border: 2px solid rgba(var(--text-muted-rgb), 0.3);
+        color: var(--text-muted);
+    }
+    
+    .subscription-btn-secondary:hover {
+        background: rgba(var(--text-muted-rgb), 0.05);
+        border-color: rgba(var(--text-muted-rgb), 0.5);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+    }
+    
+    /* Enhanced Modal Styling for Cancel Subscription */
+    .modal-dialog {
+        max-width: 540px;
+        margin: 1.75rem auto;
+    }
+    
+    .cancel-modal {
+        border: none;
+        border-radius: var(--border-radius-lg);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        background: var(--bg-card);
+        overflow: hidden;
+    }
+    
+    /* Ensure modal is hidden by default */
+    .modal {
+        display: none !important;
+    }
+    
+    .modal.show {
+        display: block !important;
+    }
+    
+    .cancel-modal-header {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        border-bottom: none;
+        padding: 1.5rem;
+        position: relative;
+    }
+    
+    .modal-title-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .modal-icon-warning {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .cancel-modal-header .modal-title {
+        margin: 0;
+        font-size: 1.3rem;
+        font-weight: 600;
+        letter-spacing: 0.025em;
+    }
+    
+    .cancel-modal-header .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: 0.8;
+        transition: opacity 0.3s ease;
+    }
+    
+    .cancel-modal-header .btn-close:hover {
+        opacity: 1;
+    }
+    
+    .cancel-modal-body {
+        padding: 2rem;
+        background: var(--bg-card);
+    }
+    
+    .cancel-confirmation-content {
+        text-align: left;
+    }
+    
+    .cancel-question {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        line-height: 1.4;
+    }
+    
+    .cancellation-details {
+        background: rgba(var(--primary-color-rgb), 0.03);
+        border-radius: var(--border-radius-md);
+        padding: 1.5rem;
+        border: 1px solid rgba(var(--primary-color-rgb), 0.1);
+    }
+    
+    .detail-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .detail-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .detail-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: white;
+        border-radius: var(--border-radius-sm);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .detail-item:nth-child(1) {
+        border-left-color: #ffc107;
+    }
+    
+    .detail-item:nth-child(2) {
+        border-left-color: #dc3545;
+    }
+    
+    .detail-item:nth-child(3) {
+        border-left-color: #28a745;
+    }
+    
+    .detail-item i {
+        margin-top: 0.125rem;
+        flex-shrink: 0;
+    }
+    
+    .detail-item span {
+        font-size: 0.95rem;
+        line-height: 1.4;
+        color: var(--text-primary);
+    }
+    
+    .cancel-modal-footer {
+        padding: 1.5rem 2rem;
+        background: rgba(var(--bg-secondary-rgb), 0.5);
+        border-top: 1px solid rgba(var(--border-color-rgb), 0.1);
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+    }
+    
+    .cancel-btn-keep,
+    .cancel-btn-confirm {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border-radius: var(--border-radius-md);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-size: 0.95rem;
+        letter-spacing: 0.025em;
+    }
+    
+    .cancel-btn-keep {
+        background: rgba(var(--text-muted-rgb), 0.1);
+        border: 2px solid rgba(var(--text-muted-rgb), 0.2);
+        color: var(--text-muted);
+    }
+    
+    .cancel-btn-keep:hover {
+        background: rgba(var(--text-muted-rgb), 0.15);
+        border-color: rgba(var(--text-muted-rgb), 0.3);
+        color: var(--text-primary);
+        transform: translateY(-1px);
+    }
+    
+    .cancel-btn-confirm {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border: 2px solid transparent;
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+    
+    .cancel-btn-confirm:hover {
+        background: linear-gradient(135deg, #c82333, #bd2130);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+    }
+
+    /* Responsive modal for mobile */
+    @media (max-width: 576px) {
+        .modal-dialog {
+            max-width: 95%;
+            margin: 0.5rem auto;
+        }
+        
+        .cancel-modal-header {
+            padding: 1.25rem;
+        }
+        
+        .modal-title-container {
+            gap: 0.75rem;
+        }
+        
+        .modal-icon-warning {
+            width: 40px;
+            height: 40px;
+            font-size: 1.25rem;
+        }
+        
+        .cancel-modal-header .modal-title {
+            font-size: 1.1rem;
+        }
+        
+        .cancel-modal-body {
+            padding: 1.5rem;
+        }
+        
+        .cancel-question {
+            font-size: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .cancellation-details {
+            padding: 1.25rem;
+        }
+        
+        .cancel-modal-footer {
+            padding: 1.25rem;
+            flex-direction: column;
+        }
+        
+        .cancel-btn-keep,
+        .cancel-btn-confirm {
+            flex: none;
+        }
+        
+        .subscription-status-header {
+            gap: 0.75rem;
+        }
+        
+        .subscription-status-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+        }
+        
+        .subscription-status-title {
+            font-size: 1.1rem;
+        }
+        
+        .premium-benefits-section {
+            padding: 1rem;
+        }
+        
+        .subscription-actions {
+            gap: 0.5rem;
+        }
+        
+        .subscription-btn-primary,
+        .subscription-btn-danger,
+        .subscription-btn-secondary {
+            padding: 0.625rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #dc3545, #e63946);
+        color: white;
+        border: none;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+    }
+
+    .modal-title {
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        font-size: 1.25rem;
+    }
+
+    .modal-title::before {
+        content: "⚠️";
+        margin-right: 0.75rem;
+        font-size: 1.5rem;
+    }
+
+    .btn-close {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        opacity: 1;
+        filter: invert(1);
+        transition: all 0.2s ease;
+    }
+
+    .btn-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+    }
+
+    .modal-body {
+        padding: var(--spacing-lg);
+        text-align: center;
+    }
+
+    .modal-body .fa-exclamation-triangle {
+        color: #ffc107;
+        margin-bottom: var(--spacing-md);
+        filter: drop-shadow(0 2px 4px rgba(255, 193, 7, 0.3));
+    }
+
+    .modal-body p {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .alert-warning {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: var(--border-radius-sm);
+        padding: var(--spacing-md);
+        text-align: left;
+        margin: var(--spacing-md) 0;
+    }
+
+    .alert-warning strong {
+        color: #856404;
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .alert-warning strong::before {
+        content: "⚠️";
+        margin-right: 0.5rem;
+    }
+
+    .alert-warning ul {
+        color: #856404;
+        margin-bottom: 0;
+        padding-left: 1.25rem;
+    }
+
+    .alert-warning li {
+        margin-bottom: 0.25rem;
+    }
+
+    .modal-footer {
+        background: var(--bg-light);
+        border: none;
+        padding: var(--spacing-md) var(--spacing-lg);
+        border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
+        justify-content: center;
+        gap: var(--spacing-sm);
+    }
+
+    /* Enhanced Cancel Subscription Button in Card */
+    .btn-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius-sm);
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 8px rgba(220, 53, 69, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-danger::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #c82333, #bd2130);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    .btn-danger:hover::before {
+        left: 100%;
+    }
+
+    .btn-danger:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(220, 53, 69, 0.2);
+    }
+
+    /* Enhanced Keep Subscription Button */
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius-sm);
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 8px rgba(108, 117, 125, 0.2);
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(135deg, #5a6268, #545b62);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(108, 117, 125, 0.3);
+        color: white;
+    }
+
+    /* Enhanced Subscription Status Icons */
+    .subscription-status-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: var(--spacing-md);
+        flex-shrink: 0;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .subscription-status-icon.active {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .subscription-status-icon.inactive {
+        background: linear-gradient(135deg, #6c757d, #495057);
+        color: white;
+    }
+
+    /* Improved Subscription Benefits */
+    .highlight-card {
+        background: linear-gradient(135deg, rgba(65, 105, 225, 0.05), rgba(65, 105, 225, 0.02));
+        border: 1px solid rgba(65, 105, 225, 0.15);
+        border-radius: var(--border-radius-sm);
+        padding: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .highlight-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .highlight-card h6 {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: var(--primary-color);
+        font-size: 1.1rem;
+    }
+
+    .highlight-card h6 i {
+        margin-right: 0.5rem;
+        font-size: 1.2rem;
+    }
+
+    .highlight-card ul {
+        margin-bottom: 0;
+        padding-left: 1.5rem;
+        color: var(--text-secondary);
+    }
+
+    .highlight-card li {
+        margin-bottom: 0.5rem;
+        position: relative;
+    }
+
+    .highlight-card li::before {
+        content: "✓";
+        color: var(--primary-color);
+        font-weight: bold;
+        position: absolute;
+        left: -1.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container profile-section">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h1 class="profile-name">{{ name if name else 'O\'Study User' }}</h1>
+                <div class="profile-email">{{ current_user.email }}</div>
+                
+                <div class="account-status-wrapper">
+                    {% if subscription and subscription.active %}
+                        <span class="account-status premium">
+                            <i class="fas fa-crown"></i> Premium Member
+                        </span>
+                    {% else %}
+                        <span class="account-status trial">
+                            <i class="fas fa-user"></i> Trial Account
+                        </span>
+                        <a href="{{ url_for('pricing') }}" class="upgrade-button">
+                            <i class="fas fa-arrow-up"></i> Upgrade Now
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-5 d-none d-md-block">
+                <img src="{{ url_for('static', filename='assets/profile-illustration.svg') }}" alt="Profile illustration" class="img-fluid" style="max-height: 200px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content - Two-column Layout -->
+    <div class="row">
+        <!-- Left Column: Performance & Progress -->
+        <div class="col-lg-8">
+            <!-- Learning Summary Card -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-line card-icon"></i> Learning Progress
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <!-- Key Stats with Tooltips -->
+                    <div class="stats-overview">
+                        <div class="stat-box">
+                            <div class="stat-number">{{ total_questions }}</div>
+                            <div class="stat-label">Total Questions</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">
+                                {% if stats %}
+                                    {% set total_correct = 0 %}
+                                    {% for exam, data in stats.items() %}
+                                        {% set total_correct = total_correct + data.correct %}
+                                    {% endfor %}
+                                    {{ total_correct }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </div>
+                            <div class="stat-label">Correct Answers</div>
+                        </div>
+                        <div class="stat-box tooltip-wrapper">
+                            <div class="stat-number">
+                                {% if total_questions and total_questions > 0 %}
+                                    {% set total_correct = 0 %}
+                                    {% for exam, data in stats.items() %}
+                                        {% set total_correct = total_correct + data.correct %}
+                                    {% endfor %}
+                                    {{ ((total_correct / total_questions) * 100) | round }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </div>
+                            <div class="stat-label">Accuracy Rate</div>
+                            <div class="tooltip-text">Percentage of questions you've answered correctly</div>
+                        </div>
+                        <!-- Add Day Streak -->
+                        <div class="stat-box tooltip-wrapper">
+                            <div class="stat-number">5</div>
+                            <div class="stat-label">Day Streak</div>
+                            <div class="tooltip-text">Consecutive days you've practiced</div>
+                        </div>
+                    </div>
+
+                    <!-- Exam Performance Table with Enhanced Visual Design -->
+                    {% if stats and stats|length > 0 %}
+                    <h5 class="section-heading"><i class="fas fa-graduation-cap"></i>Exam Type Performance</h5>
+                    <table class="progress-table">
+                        <thead>
+                            <tr>
+                                <th>Exam Type</th>
+                                <th>Questions</th>
+                                <th>Correct</th>
+                                <th>Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam_type, data in stats.items() %}
+                            <tr>
+                                <td><strong>{{ exam_type }}</strong></td>
+                                <td>{{ data.total }}</td>
+                                <td>{{ data.correct }}</td>
+                                <td>
+                                    <span class="success-rate" style="background-color: 
+                                        {% if data.percentage >= 80 %}rgba(25, 135, 84, 0.1){% elif data.percentage >= 60 %}rgba(253, 126, 20, 0.1){% else %}rgba(220, 53, 69, 0.1){% endif %}; 
+                                        color: 
+                                        {% if data.percentage >= 80 %}#198754{% elif data.percentage >= 60 %}#fd7e14{% else %}#dc3545{% endif %}">
+                                        {{ data.percentage }}%
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <div class="mb-3"><i class="fas fa-hourglass-start fa-3x text-muted"></i></div>
+                        <p>You haven't answered any questions yet.</p>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Start Practicing
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Enhanced Badge summary -->
+                    <div class="badge-summary">
+                        <div class="badge-count">
+                            <span class="badge-number">
+                                {{ current_user.badges|length if current_user.badges else 0 }}
+                            </span>
+                        </div>
+                        <div class="badge-info">
+                            <h3>Your Achievements</h3>
+                            <p>You've earned badges for your progress. Keep going!</p>
+                            <a href="{{ url_for('buddy.view_badges') }}" class="badge-link">
+                                <i class="fas fa-trophy"></i> View All Badges
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Question History & Practice Options - grouped together -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-book-reader card-icon"></i> Study Activities
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="section-heading"><i class="fas fa-history text-primary"></i>Question History</h5>
+                                <p class="text-muted">Review past performance and analyze strengths and weaknesses.</p>
+                                <a href="{{ url_for('question_history') }}" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> View History
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h5 class="section-heading"><i class="fas fa-dumbbell text-primary"></i>Practice Questions</h5>
+                                <p class="text-muted">Continue your learning journey with more practice questions.</p>
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                                    <i class="fas fa-play"></i> Practice Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: User Settings & Account Info -->
+        <div class="col-lg-4">
+            <!-- Account Management Card - Combined Account Settings with Clearer Sections -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-user-cog card-icon"></i> Account Management
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <!-- Name Update Section -->
+                    <h5 class="section-heading"><i class="fas fa-id-card text-primary"></i>Personal Information</h5>
+                    <form method="POST" action="{{ url_for('update_profile') }}" class="mb-4">
+                        <div class="form-group">
+                            <label for="name" class="form-label">
+                                <i class="fas fa-user"></i> Full Name
+                            </label>
+                            <input type="text" name="name" id="name" class="form-control" 
+                                   value="{{ name if name }}" placeholder="Enter your name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope"></i> Email Address
+                            </label>
+                            <input type="email" id="email" class="form-control" 
+                                   value="{{ current_user.email }}" readonly disabled>
+                            <small class="text-muted">Email cannot be changed</small>
+                        </div>
+                        
+                        <button type="submit" class="submit-button">
+                            <i class="fas fa-save"></i> Update Profile
+                        </button>
+                    </form>
+                    
+                    <!-- Password Update Section -->
+                    <h5 class="section-heading"><i class="fas fa-lock text-primary"></i>Security</h5>
+                    <form method="POST" action="{{ url_for('update_profile') }}" class="mb-4">
+                        <div class="form-group">
+                            <label for="current-password" class="form-label">
+                                <i class="fas fa-key"></i> Current Password
+                            </label>
+                            <input type="password" name="current_password" id="current-password" class="form-control" placeholder="Enter current password">
+                        </div>
+                        
+                        <div class="password-fields">
+                            <div class="form-group">
+                                <label for="new-password" class="form-label">
+                                    <i class="fas fa-key"></i> New Password
+                                </label>
+                                <input type="password" name="new_password" id="new-password" class="form-control" placeholder="Enter new password">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="confirm-password" class="form-label">
+                                    <i class="fas fa-check"></i> Confirm
+                                </label>
+                                <input type="password" name="confirm_password" id="confirm-password" class="form-control" placeholder="Confirm new password">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="submit-button">
+                            <i class="fas fa-lock"></i> Change Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Subscription Info Card with Enhanced Visual Elements -->
+            {% if subscription %}
+            <div class="profile-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-crown card-icon"></i> Subscription Status
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="subscription-status-header">
+                        <div class="subscription-status-icon {% if subscription.active %}active{% else %}inactive{% endif %}">
+                            <i class="fas {% if subscription.active %}fa-crown{% else %}fa-times-circle{% endif %}"></i>
+                        </div>
+                        <div class="subscription-status-content">
+                            <h5 class="subscription-status-title">
+                                {% if subscription.active %}
+                                <span class="text-success fw-bold">Premium Active</span>
+                                {% else %}
+                                <span class="text-muted fw-semibold">Subscription Inactive</span>
+                                {% endif %}
+                            </h5>
+                            <p class="subscription-status-subtitle">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Member since {{ subscription.created_at.strftime('%B %d, %Y') }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="premium-benefits-section">
+                        <div class="benefits-header">
+                            <i class="fas fa-star text-warning me-2"></i>
+                            <span class="fw-semibold">Premium Benefits</span>
+                        </div>
+                        <div class="benefits-list">
+                            <div class="benefit-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span>Unlimited questions across all exam types</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span>Detailed AI-powered explanations</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span>Access to premium badges and achievements</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                                <span>Enhanced performance tracking</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="subscription-actions">
+                        {% if not subscription.active %}
+                        <a href="{{ url_for('pricing') }}" class="btn btn-primary subscription-btn-primary">
+                            <i class="fas fa-arrow-up me-2"></i> Upgrade to Premium
+                        </a>
+                        {% else %}
+                        <button type="button" class="btn btn-danger subscription-btn-danger" data-bs-toggle="modal" data-bs-target="#cancelSubscriptionModal">
+                            <i class="fas fa-times-circle me-2"></i> Cancel Subscription
+                        </button>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-secondary subscription-btn-secondary">
+                            <i class="fas fa-sign-out-alt me-2"></i> Sign Out
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cancel Subscription Modal - Only appears when subscription is active -->
+            {% if subscription.active %}
+            <div class="modal fade" id="cancelSubscriptionModal" tabindex="-1" aria-labelledby="cancelSubscriptionModalLabel" aria-hidden="true" style="display: none !important;">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content cancel-modal">
+                        <div class="modal-header cancel-modal-header">
+                            <div class="modal-title-container">
+                                <div class="modal-icon-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <h5 class="modal-title" id="cancelSubscriptionModalLabel">Cancel Subscription</h5>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body cancel-modal-body">
+                            <div class="cancel-confirmation-content">
+                                <p class="cancel-question">Are you sure you want to cancel your premium subscription?</p>
+                                
+                                <div class="cancellation-details">
+                                    <div class="detail-header">
+                                        <i class="fas fa-info-circle text-primary me-2"></i>
+                                        <span class="fw-semibold">What happens after cancellation:</span>
+                                    </div>
+                                    <div class="detail-list">
+                                        <div class="detail-item">
+                                            <i class="fas fa-clock text-warning me-2"></i>
+                                            <span>You'll retain access until your current billing period ends</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-lock text-danger me-2"></i>
+                                            <span>You'll be limited to 20 practice questions per day</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <i class="fas fa-shield-alt text-success me-2"></i>
+                                            <span>Your progress and achievements will be preserved</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer cancel-modal-footer">
+                            <button type="button" class="btn btn-secondary cancel-btn-keep" data-bs-dismiss="modal">
+                                <i class="fas fa-arrow-left me-2"></i> Keep Subscription
+                            </button>
+                            <a href="{{ url_for('cancel_subscription') }}" class="btn btn-danger cancel-btn-confirm">
+                                <i class="fas fa-times-circle me-2"></i> Yes, Cancel Subscription
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+            
+            <!-- Learning Goals Card - New Card for Additional User Context -->
+            <div class="profile-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-bullseye card-icon"></i> Next Goals
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <i class="fas fa-medal text-warning fa-2x"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-0">Next Achievement: On a Roll</h5>
+                            <p class="text-muted mb-0">Answer 50 questions</p>
+                            <div class="progress mt-2">
+                                <div class="progress-bar" role="progressbar" style="width: 60%;" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">30/50 completed</small>
+                        </div>
+                    </div>
+                    
+                    <div class="highlight-card">
+                        <h6><i class="fas fa-lightbulb text-primary"></i>Study Tip</h6>
+                        <p class="mb-0 small">Practice consistently for at least 15 minutes each day to build a strong study habit and improve your long-term retention.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add animations to statistics
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate stat numbers on load
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach(stat => {
+            const finalValue = stat.textContent;
+            // Check if it's a numeric value (not containing %)
+            if (!isNaN(parseInt(finalValue)) && !finalValue.includes('%')) {
+                stat.textContent = '0';
+                let current = 0;
+                const target = parseInt(finalValue);
+                const increment = Math.max(1, Math.floor(target / 20));
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        clearInterval(timer);
+                        stat.textContent = finalValue;
+                    } else {
+                        stat.textContent = current;
+                    }
+                }, 30);
+            } else if (finalValue.includes('%')) {
+                // For percentage values
+                const numericValue = parseInt(finalValue);
+                if (!isNaN(numericValue)) {
+                    stat.textContent = '0%';
+                    let current = 0;
+                    const target = numericValue;
+                    const increment = Math.max(1, Math.floor(target / 20));
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            clearInterval(timer);
+                            stat.textContent = finalValue;
+                        } else {
+                            stat.textContent = current + '%';
+                        }
+                    }, 30);
+                }
+            }
+        });
+    });
+</script>
+
+<!-- Bootstrap 5 JS for modal functionality -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+
+{% endblock %}

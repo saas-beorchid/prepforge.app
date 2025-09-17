@@ -1,0 +1,727 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz Practice - PrepForge{% endblock %}
+
+{% block content %}
+<div class="container">
+<div class="quiz-container critical-content">
+    <div class="quiz-header">
+        <h2><i class="fas fa-brain"></i> Interactive Quiz Practice</h2>
+        <div class="quiz-stats">
+            <span class="stat-item">
+                <i class="fas fa-user"></i>
+                <span class="user-info">{{ current_user.name if current_user.is_authenticated else 'Guest' }}</span>
+                <span class="subscription-badge {{ 'pro' if current_user.subscription_plan == 'pro' else 'free' }}">
+                    {{ current_user.subscription_plan.upper() if current_user.is_authenticated else 'FREE' }}
+                </span>
+            </span>
+            <span class="stat-item">
+                <i class="fas fa-trophy"></i>
+                <span id="user-score">Score: 0</span>
+            </span>
+            <span class="stat-item">
+                <i class="fas fa-clock"></i>
+                <span id="questions-remaining">{{ trial_remaining if current_user.subscription_plan == 'free' else '∞' }} left</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="exam-selection">
+        <label for="exam-type">Select Exam Type:</label>
+        <select id="exam-type" class="form-select">
+            <option value="GRE">GRE - Graduate Record Examination</option>
+            <option value="GMAT">GMAT - Graduate Management Admission Test</option>
+            <option value="MCAT">MCAT - Medical College Admission Test</option>
+            <option value="LSAT">LSAT - Law School Admission Test</option>
+            <option value="SAT">SAT - Scholastic Assessment Test</option>
+            <option value="ACT">ACT - American College Testing</option>
+            <option value="TOEFL">TOEFL - Test of English as a Foreign Language</option>
+            <option value="IELTS">IELTS - International English Language Testing System</option>
+            <option value="USMLE_STEP_1">USMLE Step 1</option>
+            <option value="USMLE_STEP_2">USMLE Step 2</option>
+            <option value="NCLEX">NCLEX - National Council Licensure Examination</option>
+            <option value="PMP">PMP - Project Management Professional</option>
+            <option value="CFA">CFA - Chartered Financial Analyst</option>
+        </select>
+        
+        <label for="topic">Topic (Optional):</label>
+        <input type="text" id="topic" class="form-control" placeholder="e.g., algebra, reading comprehension">
+    </div>
+
+    <div class="quiz-actions">
+        <button id="generate-question-btn" class="btn btn-primary">
+            <i class="fas fa-magic"></i> Generate Question
+        </button>
+        <button id="upgrade-btn" class="btn btn-upgrade" style="display: none;" onclick="window.quizApp.upgradeToPro()">
+            <i class="fas fa-crown"></i> Upgrade to Pro
+        </button>
+    </div>
+
+    <!-- Loading Spinners -->
+    <div id="loading-spinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <div id="loading-text" class="loading-text">Loading...</div>
+        <div id="loading-timer" class="loading-timer">
+            <span id="loading-timer-text">0s</span>
+        </div>
+    </div>
+
+    <div id="answer-loading" class="loading-spinner" style="display: none;">
+        <div class="spinner small"></div>
+        <div class="loading-text">Checking answer...</div>
+    </div>
+
+    <div id="payment-loading" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+        <div class="loading-text">Processing payment...</div>
+    </div>
+
+    <div id="question-container" class="question-container" style="display: none;">
+        <div class="question-header">
+            <div class="difficulty-indicator">
+                <span id="difficulty-badge" class="difficulty-badge">Medium</span>
+            </div>
+        </div>
+        
+        <div class="question-content">
+            <div id="question-text" class="question-text math" role="main" aria-live="polite"></div>
+            <div id="question-options" class="question-options options-container" role="radiogroup" aria-label="Answer choices"></div>
+        </div>
+        
+        <div class="question-actions">
+            <button id="submit-answer-btn" class="btn btn-success" disabled>
+                <i class="fas fa-check"></i> Submit Answer
+            </button>
+            <button id="new-question-btn" class="btn btn-secondary" style="display: none;">
+                <i class="fas fa-arrow-right"></i> Next Question
+            </button>
+            <button id="exit-practice-btn" class="btn btn-outline-secondary">
+                <i class="fas fa-sign-out-alt"></i> Exit Practice
+            </button>
+        </div>
+    </div>
+
+    <div id="answer-feedback" class="answer-feedback" style="display: none;">
+        <div class="feedback-header">
+            <span id="feedback-result" class="feedback-result"></span>
+        </div>
+        <div class="feedback-content">
+            <div id="correct-answer" class="correct-answer"></div>
+            
+            <!-- Enhanced explanation section with collapsible content -->
+            <div class="explanation-container">
+                <div class="explanation-section">
+                    <div class="explanation-header" onclick="toggleExplanation('technical')">
+                        <i class="fas fa-cog"></i> Technical Explanation
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="explanation-technical" class="explanation-content collapsed">
+                        <div class="explanation-text math"></div>
+                    </div>
+                </div>
+                
+                <div class="explanation-section">
+                    <div class="explanation-header" onclick="toggleExplanation('simple')">
+                        <i class="fas fa-lightbulb"></i> Simple Explanation
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="explanation-simple" class="explanation-content collapsed">
+                        <div class="explanation-text math"></div>
+                    </div>
+                </div>
+                
+                <div class="explanation-section">
+                    <div class="explanation-header" onclick="toggleExplanation('concepts')">
+                        <i class="fas fa-key"></i> Key Concepts
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </div>
+                    <div id="explanation-concepts" class="explanation-content collapsed">
+                        <div class="explanation-text math"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading" class="loading" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <span id="loading-text">Generating question...</span>
+            <div class="loading-timer">
+                <span id="loading-timer-text">0s</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Enhanced loading states for different actions -->
+    <div id="answer-loading" class="loading answer-loading" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner small"></div>
+            <span>Checking answer...</span>
+        </div>
+    </div>
+    
+    <div id="payment-loading" class="loading payment-loading" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <span>Processing upgrade...</span>
+        </div>
+    </div>
+
+    <div id="error-message" class="error-message" style="display: none;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="error-text"></span>
+    </div>
+</div>
+
+<!-- Mixpanel Integration -->
+<script type="text/javascript">
+(function(c,a){if(!a.__SV){var b=window;try{var d,m,j,k=b.location,f=k.hash;d=function(a,b){return(m=a.match(RegExp(b+"=([^&]*)")))?m[1]:null};f&&d(f,"state")&&(j=JSON.parse(decodeURIComponent(d(f,"state"))),"mpeditor"===j.action&&(b.sessionStorage.setItem("_mpcehash",f),history.replaceState(j.desiredHash||"",c.title,k.pathname+k.search)))}catch(n){}var l,h;window.mixpanel=a;a._i=[];a.init=function(b,d,g){function c(b,i){var a=i.split(".");2==a.length&&(b=b[a[0]],i=a[1]);b[i]=function(){b.push([i].concat(Array.prototype.slice.call(arguments,0)))}}var e=a;"undefined"!==typeof g?e=a[g]=[]:g="mixpanel";e.people=e.people||[];e.toString=function(b){var a="mixpanel";"mixpanel"!==g&&(a+="."+g);b||(a+=" (stub)");return a};e.people.toString=function(){return e.toString(1)+".people (stub)"};l="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");for(h=0;h<l.length;h++)c(e,l[h]);a._i.push([b,d,g])};a.__SV=1.2;b=c.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn4.mxpnl.com/libs/mixpanel-2-latest.min.js";d=c.getElementsByTagName("script")[0];d.parentNode.insertBefore(b,d)}})(document,window.mixpanel||[]);
+
+// Initialize with token from backend
+{% if mixpanel_token %}
+window.mixpanelToken = "{{ mixpanel_token }}";
+window.mixpanel.init("{{ mixpanel_token }}", {debug: true, track_pageview: true, persistence: "localStorage"});
+{% if current_user.is_authenticated %}
+window.userId = "{{ current_user.id }}";
+window.userEmail = "{{ current_user.email }}";
+window.userPlan = "{{ current_user.subscription_plan }}";
+window.mixpanel.identify("{{ current_user.id }}");
+window.mixpanel.people.set({
+    "$email": "{{ current_user.email }}",
+    "$name": "{{ current_user.name or current_user.email }}",
+    "subscription_plan": "{{ current_user.subscription_plan }}"
+});
+{% else %}
+window.userId = "anonymous";
+window.userEmail = "";
+window.userPlan = "free";
+{% endif %}
+{% else %}
+window.mixpanelToken = null;
+window.userId = "anonymous";
+window.userEmail = "";
+window.userPlan = "free";
+{% endif %}
+</script>
+
+<script src="{{ url_for('static', filename='js/quiz.js') }}" defer></script>
+
+<!-- Load embedded checkout after quiz.js -->
+<script type="module">
+    // Modern embedded checkout integration
+    console.log('🔧 Loading embedded checkout integration...');
+    
+    // Enhanced upgrade function with embedded checkout
+    window.upgradeToProEmbedded = async function() {
+        try {
+            console.log('🚀 Starting embedded checkout upgrade process...');
+            
+            // Show loading state
+            const loadingElement = document.getElementById('payment-loading');
+            if (loadingElement) {
+                loadingElement.style.display = 'block';
+            }
+            
+            // Create checkout session
+            const response = await fetch('/create-checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success && data.client_secret) {
+                console.log('✅ Client secret received, mounting embedded checkout...');
+                
+                // Hide loading
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+                
+                // Mount embedded checkout
+                await mountEmbeddedCheckout(data.client_secret);
+            } else {
+                throw new Error(data.error || 'Failed to create checkout session');
+            }
+            
+        } catch (error) {
+            console.error('❌ Embedded checkout error:', error);
+            if (loadingElement) loadingElement.style.display = 'none';
+            alert('Checkout failed: ' + error.message);
+        }
+    };
+    
+    async function mountEmbeddedCheckout(clientSecret) {
+        // Dynamic Stripe loading and embedded checkout mounting
+        if (!window.Stripe) {
+            console.log('📦 Loading Stripe.js...');
+            await new Promise((resolve) => {
+                const script = document.createElement('script');
+                script.src = 'https://js.stripe.com/v3/';
+                script.onload = resolve;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Initialize Stripe (use environment variable for publishable key)
+        const stripe = Stripe('pk_test_your_publishable_key_here');
+        
+        // Create or get checkout container
+        let overlay = document.getElementById('checkout-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'checkout-overlay';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.8); z-index: 10000;
+                overflow-y: auto; padding: 2rem; box-sizing: border-box;
+                backdrop-filter: blur(4px);
+            `;
+            
+            const container = document.createElement('div');
+            container.id = 'embedded-checkout-container';
+            container.style.cssText = `
+                max-width: 600px; margin: 0 auto; background: white;
+                border-radius: 12px; padding: 2rem; position: relative;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            `;
+            
+            // Close button
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.style.cssText = `
+                position: absolute; top: 1rem; right: 1rem;
+                background: none; border: none; font-size: 2rem;
+                cursor: pointer; color: #666; z-index: 1;
+            `;
+            closeBtn.onclick = () => {
+                overlay.style.display = 'none';
+                console.log('❌ Checkout closed by user');
+            };
+            
+            container.appendChild(closeBtn);
+            overlay.appendChild(container);
+            document.body.appendChild(overlay);
+        }
+        
+        // Clear container and mount checkout
+        const container = document.getElementById('embedded-checkout-container');
+        const existingContent = container.querySelector('.close-btn') || container.querySelector('button');
+        container.innerHTML = '';
+        if (existingContent) container.appendChild(existingContent);
+        
+        // Mount embedded checkout
+        const checkout = await stripe.initEmbeddedCheckout({
+            clientSecret: clientSecret
+        });
+        
+        checkout.mount('#embedded-checkout-container');
+        overlay.style.display = 'block';
+        
+        console.log('✅ Embedded checkout mounted and displayed');
+    }
+    
+    console.log('✅ Embedded checkout integration loaded');
+</script>
+
+<style>
+.quiz-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.quiz-header {
+    background: linear-gradient(135deg, #4169e1 0%, #6b7fff 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.quiz-header h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.8rem;
+}
+
+.quiz-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.subscription-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.subscription-badge.free {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.subscription-badge.pro {
+    background: #d4a859;
+    color: #1a1a1a;
+}
+
+.exam-selection {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.exam-selection label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-select, .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: #4169e1;
+    outline: none;
+}
+
+.quiz-actions {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0.5rem;
+}
+
+.btn-primary {
+    background: #4169e1;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2c4fd8;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-upgrade {
+    background: linear-gradient(135deg, #d4a859 0%, #f1c40f 100%);
+    color: #1a1a1a;
+    font-weight: bold;
+}
+
+.btn-upgrade:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 168, 89, 0.4);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.question-container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.difficulty-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.difficulty-badge.easy {
+    background: #d4edda;
+    color: #155724;
+}
+
+.difficulty-badge.medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.difficulty-badge.hard {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.question-text {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.question-options {
+    margin-bottom: 2rem;
+}
+
+.option {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.option:hover {
+    border-color: #4169e1;
+    background: #f0f4ff;
+}
+
+.option.selected {
+    border-color: #4169e1;
+    background: #e3f2fd;
+}
+
+.option.correct {
+    border-color: #28a745;
+    background: #d4edda;
+}
+
+.option.incorrect {
+    border-color: #dc3545;
+    background: #f8d7da;
+}
+
+.option-letter {
+    font-weight: bold;
+    color: #4169e1;
+    min-width: 30px;
+}
+
+.answer-feedback {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.feedback-result {
+    font-size: 1.2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.feedback-result.correct {
+    color: #28a745;
+}
+
+.feedback-result.incorrect {
+    color: #dc3545;
+}
+
+.correct-answer {
+    background: #d4edda;
+    border-left: 4px solid #28a745;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.explanation {
+    background: #f8f9fa;
+    border-left: 4px solid #4169e1;
+    padding: 1rem;
+    border-radius: 4px;
+    line-height: 1.6;
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4169e1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .quiz-container {
+        padding: 1rem;
+    }
+    
+    .quiz-stats {
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        font-size: 0.9rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<script src="/static/js/quiz.js"></script>
+
+<!-- MathJax for mathematical expressions -->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script>
+window.MathJax = {
+    tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    }
+};
+</script>
+
+<!-- Mixpanel tracking -->
+{% if mixpanel_token %}
+<script>
+window.mixpanelToken = '{{ mixpanel_token }}';
+window.userId = '{{ current_user.id if current_user.is_authenticated else "anonymous" }}';
+window.userPlan = '{{ current_user.subscription_plan if current_user.is_authenticated else "free" }}';
+</script>
+{% endif %}
+
+<!-- Stripe Integration -->
+<script>
+function upgradeToProStripe() {
+    console.log('🚀 Initiating Stripe Pro upgrade...');
+    
+    // Show loading state
+    const upgradeBtn = document.getElementById('upgrade-btn');
+    const originalText = upgradeBtn.innerHTML;
+    upgradeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    upgradeBtn.disabled = true;
+    
+    // Track the upgrade attempt
+    if (window.mixpanel && window.mixpanelToken) {
+        mixpanel.track('Upgrade Initiated', {
+            user_id: window.userId,
+            upgrade_type: 'pro',
+            payment_method: 'stripe'
+        });
+    }
+    
+    // Create form and submit to checkout session (which redirects to Stripe)
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/create-checkout-session';
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Check payment status on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    
+    // Check if we're on success or cancel page by URL path
+    if (window.location.pathname === '/success') {
+        console.log('✅ Payment successful!');
+        
+        // Track successful upgrade
+        if (window.mixpanel && window.mixpanelToken) {
+            mixpanel.track('Upgrade Completed', {
+                user_id: window.userId,
+                upgrade_type: 'pro',
+                payment_method: 'stripe'
+            });
+        }
+        
+    } else if (window.location.pathname === '/cancel') {
+        console.log('⚠️ Payment cancelled');
+        
+        // Track cancellation
+        if (window.mixpanel && window.mixpanelToken) {
+            mixpanel.track('Upgrade Cancelled', {
+                user_id: window.userId,
+                upgrade_type: 'pro',
+                payment_method: 'stripe'
+            });
+        }
+    }
+});
+</script>
+
+{% endblock %}

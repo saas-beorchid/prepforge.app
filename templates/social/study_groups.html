@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Study Groups - PrepForge{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/social.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 study-groups-container">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-4 mb-2">
+                <i class="fas fa-users text-primary"></i> Study Groups
+            </h1>
+            <p class="lead text-muted">Join or create study groups to learn together</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('social.create_study_group') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i> Create Group
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="search-container">
+                <input type="text" id="group-search" class="form-control" placeholder="Search study groups...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <select class="form-select" id="exam-filter">
+                <option value="">All Exam Types</option>
+                <option value="GMAT">GMAT</option>
+                <option value="GRE">GRE</option>
+                <option value="MCAT">MCAT</option>
+                <option value="LSAT">LSAT</option>
+                <option value="SAT">SAT</option>
+                <option value="ACT">ACT</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Your Groups Section -->
+    {% if user_groups %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="section-title">
+                <i class="fas fa-star text-warning me-2"></i> Your Groups
+            </h3>
+            <div class="row">
+                {% for group in user_groups %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="group-card your-group">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="group-name">{{ group.name }}</h5>
+                                <p class="group-description">{{ group.description or 'No description available' }}</p>
+                                <div class="group-meta">
+                                    <span class="exam-type">{{ group.exam_type }}</span>
+                                    <span class="member-count">
+                                        <i class="fas fa-users me-1"></i> {{ group.member_count }} members
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('social.group_discussion', group_id=group.id) }}" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-comments me-1"></i> Enter Group
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Available Groups Section -->
+    <div class="row">
+        <div class="col-12">
+            <h3 class="section-title">
+                <i class="fas fa-globe text-info me-2"></i> Available Groups
+            </h3>
+            {% if available_groups %}
+            <div class="row">
+                {% for group in available_groups %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="group-card">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="group-name">{{ group.name }}</h5>
+                                <p class="group-description">{{ group.description or 'No description available' }}</p>
+                                <div class="group-meta">
+                                    <span class="exam-type">{{ group.exam_type }}</span>
+                                    <span class="member-count">
+                                        <i class="fas fa-users me-1"></i> {{ group.member_count }}/{{ group.max_members }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn btn-outline-primary btn-sm join-group-btn" 
+                                        data-group-id="{{ group.id }}">
+                                    <i class="fas fa-user-plus me-1"></i> Join Group
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                <h4>No study groups available</h4>
+                <p class="text-muted">Be the first to create a study group for your exam!</p>
+                <a href="{{ url_for('social.create_study_group') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i> Create First Group
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Join Group Modal -->
+<div class="modal fade" id="joinGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Join Study Group</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to join this study group?</p>
+                <div id="groupDetails"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmJoinGroup">Join Group</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/social-features.js') }}"></script>
+<style>
+.search-container {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.section-title {
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-weight: 600;
+}
+
+.group-card {
+    transition: all 0.3s ease;
+}
+
+.group-card:hover {
+    transform: translateY(-5px);
+}
+
+.group-card.your-group .card {
+    border: 2px solid #4169e1;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+}
+
+.group-name {
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.group-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.group-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.exam-type {
+    background: #4169e1;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.member-count {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.card-footer {
+    background: transparent;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Search functionality
+    const searchInput = document.getElementById('group-search');
+    const examFilter = document.getElementById('exam-filter');
+    
+    function filterGroups() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const examType = examFilter.value;
+        const groupCards = document.querySelectorAll('.group-card');
+        
+        groupCards.forEach(card => {
+            const groupName = card.querySelector('.group-name')?.textContent.toLowerCase() || '';
+            const groupDescription = card.querySelector('.group-description')?.textContent.toLowerCase() || '';
+            const groupExam = card.querySelector('.exam-type')?.textContent || '';
+            
+            const matchesSearch = groupName.includes(searchTerm) || groupDescription.includes(searchTerm);
+            const matchesExam = !examType || groupExam === examType;
+            
+            if (matchesSearch && matchesExam) {
+                card.style.display = 'block';
+                card.classList.add('fade-in');
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    searchInput.addEventListener('input', filterGroups);
+    examFilter.addEventListener('change', filterGroups);
+});
+</script>
+{% endblock %}
