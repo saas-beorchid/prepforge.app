@@ -495,6 +495,22 @@ def show_question():
     log_session_state()
     
     # Handle navigation via URL parameters (do not clear stored answers)
+    goto_param = request.args.get('goto')
+    if goto_param is not None:
+        try:
+            target_index = int(goto_param)
+        except ValueError:
+            target_index = None
+        if target_index is not None:
+            question_ids = session.get('question_ids', [])
+            if question_ids:
+                max_index = len(question_ids) - 1
+                if target_index < 0:
+                    target_index = 0
+                if target_index > max_index:
+                    target_index = max_index
+                session['current_index'] = target_index
+                logging.debug(f"Jumping to question {target_index + 1} via goto param")
     if request.args.get('next'):
         current_index = session.get('current_index', 0)
         question_ids = session.get('question_ids', [])

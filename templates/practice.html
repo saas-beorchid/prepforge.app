@@ -10,17 +10,30 @@
 <!-- Mixpanel tracking -->
 <script type="text/javascript">
 (function(c,a){if(!a.__SV){var b=window;try{var d,m,j,k=b.location,f=k.hash;d=function(a,b){return(m=a.match(RegExp(b+"=([^&]*)")))?m[1]:null};f&&d(f,"state")&&(j=JSON.parse(decodeURIComponent(d(f,"state"))),"mpeditor"===j.action&&(b.sessionStorage.setItem("_mpcehash",f),history.replaceState(j.desiredHash||"",c.title,k.pathname+k.search)))}catch(n){}var l,h;window.mixpanel=a;a._i=[];a.init=function(b,d,g){function c(b,i){var a=i.split(".");2==a.length&&(b=b[a[0]],i=a[1]);b[i]=function(){b.push([i].concat(Array.prototype.slice.call(arguments,0)))}}var e=a;"undefined"!==typeof g?e=a[g]=[]:g="mixpanel";e.people=e.people||[];e.toString=function(b){var a="mixpanel";"mixpanel"!==g&&(a+="."+g);b||(a+=" (stub)");return a};e.people.toString=function(){return e.toString(1)+".people (stub)"};l="disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(" ");for(h=0;h<l.length;h++)c(e,l[h]);var f="set_config";for(h=0;h<["group"].length;h++)c(e,f+"_"+["group"][h]);a._i.push([b,d,g])};a.__SV=1.2;b=c.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===c.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";d=c.getElementsByTagName("script")[0];d.parentNode.insertBefore(b,d)}})(document,window.mixpanel||[]);
-{% if mixpanel_token %}
-mixpanel.init("{{ mixpanel_token }}", {debug: true, track_pageview: true, persistence: "localStorage"});
-{% if current_user.is_authenticated %}
-mixpanel.identify("{{ current_user.id }}");
-mixpanel.people.set({
-    "$email": "{{ current_user.email }}",
-    "$name": "{{ current_user.name or current_user.email }}",
-    "subscription_plan": "{{ current_user.subscription_plan }}"
+</script>
+<script type="text/javascript">
+// Initialize Mixpanel from data attributes to avoid template logic in JS
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        var main = document.getElementById('main-content');
+        if (!main || !window.mixpanel) { return; }
+        var token = main.getAttribute('data-mixpanel-token');
+        if (!token) { return; }
+        window.mixpanel.init(token, {debug: true, track_pageview: true, persistence: 'localStorage'});
+        var userId = main.getAttribute('data-user-id');
+        var userEmail = main.getAttribute('data-user-email');
+        if (userId) {
+            window.mixpanel.identify(userId);
+            if (userEmail) {
+                window.mixpanel.people.set({
+                    '$email': userEmail
+                });
+            }
+        }
+    } catch (e) {
+        console.warn('Mixpanel init failed', e);
+    }
 });
-{% endif %}
-{% endif %}
 </script>
 <script src="{{ url_for('static', filename='js/adaptive-practice.js') }}" defer></script>
 {% endblock %}
@@ -110,15 +123,24 @@ mixpanel.people.set({
             </div>
         </div>
 
-        <!-- Adaptive Question Controls -->
-        <div class="adaptive-controls-bar fade-in">
+        <!-- Question Pagination Controls -->
+        <div class="adaptive-controls-bar fade-in" aria-label="Question navigation">
             <div class="controls-left">
-                <button type="button" 
-                        class="btn btn-outline-primary" 
-                        data-action="generate-question"
-                        aria-label="Generate a new adaptive question based on your performance">
-                    <i class="fas fa-plus" aria-hidden="true"></i> Generate Adaptive Question
-                </button>
+                <div class="question-pagination-wrapper">
+                <div class="question-pagination" role="navigation" aria-label="Question list">
+                    {% set total = session.question_ids|length %}
+                    {% if total and total > 0 %}
+                        {% for i in range(total) %}
+                        <a href="{{ url_for('practice.show_question') }}?goto={{ i }}"
+                           class="page-dot {% if i == session.current_index %}active{% endif %}"
+                           aria-label="Go to question {{ i + 1 }}"
+                           tabindex="0">
+                            {{ i + 1 }}
+                        </a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                </div>
                 <span class="difficulty-indicator" id="difficulty-indicator">
                     {% if session.get('current_difficulty') %}
                         Current: {{ session.get('current_difficulty').title() }}
@@ -619,6 +641,17 @@ mixpanel.people.set({
             });
         });
 
+        // Enable keyboard navigation on numbered pagination links
+        document.querySelectorAll('.question-pagination .page-dot').forEach(function(dot) {
+            dot.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    window.location.href = href;
+                }
+            });
+        });
+
         // Initialize explanation tabs - show technical by default
         const techContent = document.getElementById('technicalExplanation');
         const simpleContent = document.getElementById('simplifiedExplanation');
@@ -661,6 +694,84 @@ mixpanel.people.set({
 
 <style>
     /* Explanation toggle styles */
+    /* Controls bar container adjustments to prevent overflow */
+    .adaptive-controls-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .adaptive-controls-bar .controls-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0; /* allow shrink */
+        width: 100%;
+    }
+
+    .question-pagination-wrapper {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Question pagination styles */
+    .question-pagination {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(34px, 40px));
+        gap: 8px;
+        align-items: start;
+        max-width: 100%;
+        width: 100%;
+        padding-bottom: 6px;
+        box-sizing: border-box;
+    }
+
+    .question-pagination .page-dot {
+        background: #1f2937;
+        color: #fff;
+        border: 1px solid #374151;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        transition: all 0.2s ease;
+        outline: none;
+    }
+
+    .question-pagination .page-dot:hover {
+        background: #3557c2;
+        border-color: #3557c2;
+        text-decoration: none;
+    }
+
+    .question-pagination .page-dot.active {
+        background: #4169e1;
+        border-color: #4169e1;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .question-pagination {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            gap: 8px;
+        }
+        .question-pagination .page-dot {
+            min-width: 32px;
+            padding: 6px 8px;
+            font-size: 0.8rem;
+            flex: 0 0 auto;
+        }
+    }
     .ai-explanation-container {
         margin-top: 30px;
         padding: 20px;
