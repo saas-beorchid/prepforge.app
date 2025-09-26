@@ -494,16 +494,12 @@ def show_question():
     """Display current practice question with enhanced session validation"""
     log_session_state()
     
-    # Handle navigation via URL parameters
+    # Handle navigation via URL parameters (do not clear stored answers)
     if request.args.get('next'):
         current_index = session.get('current_index', 0)
         question_ids = session.get('question_ids', [])
         if current_index < len(question_ids) - 1:
             session['current_index'] = current_index + 1
-            session['show_feedback'] = False
-            session.pop('user_answer', None)
-            session.pop('tech_explanation', None)
-            session.pop('simple_explanation', None)
             logging.debug(f"Moving to question {session['current_index'] + 1} of {len(question_ids)}")
             
             # Save progress to database
@@ -514,10 +510,6 @@ def show_question():
         current_index = session.get('current_index', 0)
         if current_index > 0:
             session['current_index'] = current_index - 1
-            session['show_feedback'] = False
-            session.pop('user_answer', None)
-            session.pop('tech_explanation', None)
-            session.pop('simple_explanation', None)
             logging.debug(f"Moving back to question {session['current_index'] + 1}")
     
     if not PracticeSessionManager.validate_session():
@@ -614,8 +606,13 @@ def show_question():
         question.question_text = format_math_content(question.question_text)
         question.choices = [format_math_content(choice) for choice in question.choices]
 
-    show_feedback = session.get('show_feedback', False)
-    user_answer = session.get('user_answer', None)
+    # Restore per-question state if previously answered
+    answers_by_question = session.get('answers_by_question', {})
+    feedback_by_question = session.get('feedback_by_question', {})
+    question_key = str(question_id)
+    user_answer = answers_by_question.get(question_key)
+    feedback = feedback_by_question.get(question_key)
+    show_feedback = bool(feedback)
 
     # Create form and set choices
     form = PracticeForm()
@@ -641,9 +638,15 @@ def show_question():
     
     logging.debug(f"Rendering question with {len(question.choices)} choices")
     
-    # Get AI explanations if they exist in the session
-    tech_explanation = session.get('tech_explanation', None)
-    simple_explanation = session.get('simple_explanation', None)
+    # Get AI explanations for this question if available
+    if feedback:
+        tech_explanation = feedback.get('tech_explanation')
+        simple_explanation = feedback.get('simple_explanation')
+        session['is_correct'] = feedback.get('is_correct')
+    else:
+        tech_explanation = None
+        simple_explanation = None
+        session.pop('is_correct', None)
     
     return render_template('practice.html',
                          question=question,
@@ -843,14 +846,26 @@ def submit_answer():
     if random.random() < 0.3:
         buddy_message += f" Tip: {get_random_study_tip()}"
     
-    # Store state in session
+    # Store state in session (persist per-question)
+    answers_by_question = session.get('answers_by_question', {})
+    feedback_by_question = session.get('feedback_by_question', {})
+
+    q_key = str(question_id)
+    answers_by_question[q_key] = answer
+    feedback_by_question[q_key] = {
+        'is_correct': is_correct,
+        'tech_explanation': tech_explanation,
+        'simple_explanation': simple_explanation
+    }
+    session['answers_by_question'] = answers_by_question
+    session['feedback_by_question'] = feedback_by_question
+
+    # Maintain current, user-visible session bits
     session['user_answer'] = answer
     session['show_feedback'] = True
     session['is_correct'] = is_correct
     session['buddy_message'] = buddy_message
     session['current_streak'] = streak.current_streak if streak else 1
-    session['tech_explanation'] = tech_explanation
-    session['simple_explanation'] = simple_explanation
     
     # Store new badges if any
     if new_badges:
@@ -875,10 +890,6 @@ def previous_question():
     current_index = session.get('current_index', 0)
     if current_index > 0:
         session['current_index'] = current_index - 1
-        session['show_feedback'] = False
-        session.pop('user_answer', None)
-        session.pop('tech_explanation', None)
-        session.pop('simple_explanation', None)
         logging.debug(f"Moving back to question {session['current_index'] + 1}")
 
     return redirect(url_for('practice.show_question'))
@@ -895,10 +906,6 @@ def next_question():
     current_index = session.get('current_index', 0)
     if current_index < len(session['question_ids']) - 1:
         session['current_index'] = current_index + 1
-        session['show_feedback'] = False
-        session.pop('user_answer', None)
-        session.pop('tech_explanation', None)
-        session.pop('simple_explanation', None)
         logging.debug(f"Moving to question {session['current_index'] + 1} of {len(session['question_ids'])}")
         
         # Save progress to database
